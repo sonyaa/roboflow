@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>RoboFlow</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Conditionally load WC polyfills -->
+    <!-- Thanks to https://github.com/geelen/x-gif for the snippet -->
+    <script>
+        if ('registerElement' in document
+                && 'createShadowRoot' in HTMLElement.prototype
+                && 'import' in document.createElement('link')
+                && 'content' in document.createElement('template')) {
+            // We're using a browser with native WC support!
+        } else {
+            document.write('<script src="/bower_components/webcomponentsjs/webcomponents.js"><\/script>');
+        }
+    </script>
+
+    <!-- build:vulcanized /elements/elements.critical.vulcanized.html -->
+    <!-- <link rel="import" href="/elements/elements.critical.html"> -->
+    <!-- endbuild-->
+
+    <!-- will be replaced with /elements/elements.critical.vulcanized.html -->
+    <link rel="import" href="elements/elements.critical.html">
+    <!-- endreplace-->
+
+    <script src="scripts/vendor/jquery-1.10.2.min.js"></script>
+</head>
+<body unresolved fullbleed layout vertical>
+
+    <!-- We only use a template here in order to ensure that data binding happens -->
+    <template id="mainPage" is="auto-binding">
+        <core-scaffold>
+            <core-header-panel navigation flex mode="seamed">
+                <core-toolbar class="header-toolbar"><a href="http://www.cs.washington.edu" class="logo"><img src="images/cse.png"></a>RoboFlow</core-toolbar>
+                <core-menu id="mainMenu" theme="core-light-theme" excludedLocalNames="r-toolbox h3 core-collapse">
+
+                    <core-item icon="help" label="Instructions" on-tap="{{instructions}}"></core-item>
+                    <!--<core-item icon="settings-applications" label="Settings" on-tap="{{settings}}"></core-item>-->
+                    <core-item icon="file-download" label="Save Action" on-tap="{{download}}">
+                        <a href="#" target="_self"></a>
+                    </core-item>
+                    <core-item icon="file-upload" label="Load Action" on-tap="{{upload}}">
+                        <a href="#" target="_self"></a>
+                    </core-item>
+                    <core-item icon="clear" label="Restart" on-tap="{{restart}}"></core-item>
+
+                    <h3 class="clickable" on-tap="{{opsToggle}}">Operations<core-icon icon="{{opsListIcon}}"></core-icon></h3>
+                    <core-collapse id="ops" opened="true">
+
+                        <r-toolbox layout vertical>
+                            <r-toolbox-node src="images/tokens/manipulation.png" name="Manipulation" optSet="{{mOptions}}"
+                                              preConds="{{[PreCondType.OBJECTS, PreCondType.REACHABLE]}}" postConds="{{[PostCondType.SUCCESS]}}" color="#0000FF" operation></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/navigation.png" name="Navigation" optSet="{{lOptions}}" postConds="{{[PostCondType.SUCCESS]}}" color="#F000FF" operation></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/move_head.png" name="Head Movement" optSet="{{hOptions}}" color="#A000FF" operation></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/procedure.png" name="Saved Procedure" optSet="{{pOptions}}" postConds="{{[PostCondType.SUCCESS]}}" color="#FFF000" operation></r-toolbox-node>
+                        </r-toolbox>
+
+                    </core-collapse>
+
+                    <h3 class="clickable" on-tap="{{terminalsToggle}}">Start and end terminals<core-icon icon="{{terminalsListIcon}}"></core-icon></h3>
+                    <core-collapse id="terminals" opened="true">
+
+                        <r-toolbox layout vertical>
+                            <r-toolbox-node src="images/tokens/start.png" name="Start" color="#66FFFF" start></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/end_success.png" name="Success" color="#33CC33"  end></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/end_fail.png" name="Fail" color="#FF0000"  end></r-toolbox-node>
+                        </r-toolbox>
+
+                    </core-collapse>
+
+                </core-menu>
+            </core-header-panel>
+
+            <div tool>RoboFlow</div>
+            <div tool horizontal layout flex end-justified><img src="images/signature.png"></div>
+
+            <div layout class="content">
+
+                <r-instructions id="rInstructions"></r-instructions>
+                <r-interface id="rInterface"></r-interface>
+
+            </div>
+
+            <paper-action-dialog id="unimplementedDialog" backdrop autoCloseDisabled layered="false">
+                <p>This feature is not yet implemented!</p>
+                <p>Please check back soon...</em></b></p>
+                <paper-button affirmative>OK</paper-button>
+            </paper-action-dialog>
+
+            <paper-action-dialog id="restartDialog" backdrop autoCloseDisabled layered="false">
+                <p>Are you sure you wish to restart RoboFlow?</p>
+                <p>This will delete the action currently in the interface, and <b><em>is not reversible!</em></b></p>
+                <paper-button affirmative on-click="{{cancelRestart}}">No</paper-button>
+                <paper-button affirmative autofocus on-click="{{confirmRestart}}">Yes</paper-button>
+            </paper-action-dialog>
+
+            <!--<paper-action-dialog id="settingsDialog" backdrop autoCloseDisabled layered="false">-->
+                <!--<h3>RoboFlow Settings</h3>-->
+
+                <!--<core-label horizontal layout>-->
+                    <!--<paper-checkbox for></paper-checkbox>-->
+                    <!--<div vertical layout>-->
+                        <!--<h4>Sample Setting #1</h4>-->
+                        <!--<div>This is a description of what this setting does</div>-->
+                    <!--</div>-->
+                <!--</core-label>-->
+
+                <!--<core-label horizontal layout>-->
+                    <!--<paper-checkbox for></paper-checkbox>-->
+                    <!--<div vertical layout>-->
+                        <!--<h4>Sample Setting #2</h4>-->
+                        <!--<div>This setting presumably does something different...</div>-->
+                    <!--</div>-->
+                <!--</core-label>-->
+
+                <!--<paper-button affirmative autofocus>Done</paper-button>-->
+            <!--</paper-action-dialog>-->
+
+        </core-scaffold>
+    </template>
+
+    <script src="elements/r-interface/js/enums.js"></script>
+    <script src="elements/r-interface/js/OptionSet.js"></script>
+
+    <script>
+        var main = document.querySelector('#mainPage');
+
+        main.PreCondType = PreCondType;
+        main.PostCondType = PostCondType;
+        main.opsListIcon = 'expand-more';
+        main.terminalsListIcon = 'expand-more';
+
+        main.opsListToggle = function() {
+            main.opsListIcon = main.opsListIcon === 'expand-more' ? 'expand-less' : 'expand-more';
+            main.$.ops.toggle();
+        };
+
+        main.terminalsListToggle = function() {
+            main.terminalsListIcon = main.terminalsListIcon === 'expand-more' ? 'expand-less' : 'expand-more';
+            main.$.terminals.toggle();
+        };
+
+        main.instructions = function() {
+            main.$.rInstructions.toggle();
+        };
+//
+//        main.settings = function() {
+//            main.$.settingsDialog.toggle();
+//        };
+
+        main.download = function() {
+            console.log('Downloading action...');
+            main.$.unimplementedDialog.toggle();
+        };
+
+        main.upload = function() {
+            console.log('Uploading action...');
+            main.$.unimplementedDialog.toggle();
+        };
+
+        main.restart = function() {
+            main.$.restartDialog.toggle();
+        };
+
+        main.cancelRestart = function() {
+            console.log('canceled restart');
+        };
+
+        main.confirmRestart = function() {
+            main.$.rInterface.restart();
+            main.$.mainMenu.selected = -1;
+        };
+
+        main.mOptions = new OptionSet();
+        main.mOptions.addDropDown(
+                "Choose a saved manipulation step",
+                "Manipulation",
+                "This is the manipulation that will be used for this step",
+                ["TODO_manipulation_1",
+                    "TODO_2",
+                    "TODO_3"]
+        );
+        main.mOptions.addSlider(
+                "Object similarity",
+                "This setting tell the robot to look for less or more similar objects.",
+                0.01, 0.2, 0.075
+        );
+
+        main.hOptions = new OptionSet();
+        main.hOptions.addDropDown(
+                "Choose a saved head movement",
+                "Head position",
+                "This is the position of the robot's head that will be used for this step",
+                ["TODO_head_1",
+                    "TODO_2",
+                    "TODO_3"]
+        );
+        main.lOptions = new OptionSet();
+        main.lOptions.addDropDown(
+                "Choose a saved location",
+                "Location",
+                "This is the location of the robot that will be used for this step",
+                ["TODO_head_1",
+                    "TODO_2",
+                    "TODO_3"]
+        );
+        main.pOptions = new OptionSet();
+        main.pOptions.addDropDown(
+                "Choose a saved procedure",
+                "Procedure",
+                "This is the procedure that will be used for this step",
+                ["TODO_head_1",
+                    "TODO_2",
+                    "TODO_3"]
+        );
+
+        //TODO populate options with state
+
+    </script>
+</body>
+</html>

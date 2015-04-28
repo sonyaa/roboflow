@@ -1,0 +1,122 @@
+<script src="js/utils.js"></script>
+<script src="js/fabric.min.js"></script>
+<script src="js/fabric.canvas.clickable.js"></script>
+<script src="js/enums.js"></script>
+<script src="js/adorner.js"></script>
+<script src="js/adorners.js"></script>
+<script src="js/plug.js"></script>
+<script src="js/socket.js"></script>
+<script src="js/selector.js"></script>
+<script src="js/edge.js"></script>
+<script src="js/OptionSet.js"></script>
+<script src="js/nodeBuilderUtil.js"></script>
+
+<script src="../../../bower_components/paths-js/dist/global/paths.js"></script>
+
+<link rel="import" href="../../../bower_components/paper-dialog/paper-action-dialog.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+
+<link rel="import" href="../../../bower_components/core-collapse/core-collapse.html">
+<link rel="import" href="../../../bower_components/core-menu/core-menu.html">
+<link rel="import" href="../../../bower_components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../../bower_components/paper-slider/paper-slider.html">
+
+<script src="r-interface.js"></script>
+<polymer-element name="r-interface">
+    <template>
+        <link rel="stylesheet" href="r-interface.css">
+
+        <canvas id="c"></canvas>
+
+        <paper-action-dialog id="deleteDialog" backdrop autoCloseDisabled layered="false">
+            <p>Are you sure you wish to remove this item?</p>
+            <paper-button affirmative on-click="{{cancelDelete}}">No</paper-button>
+            <paper-button affirmative autofocus on-click="{{confirmDelete}}">Yes</paper-button>
+        </paper-action-dialog>
+
+        <paper-action-dialog id="errorDialog" backdrop autoCloseDisabled layered="false">
+            <!-- NOTE: the <p> tag below is dynamically bound depending whether the error message is simple
+                       text, or HTML. See r-interface.error() below...                                    -->
+            <p id="errorMsg"></p>
+            <paper-button affirmative on-click="{{clearError}}">Ok</paper-button>
+        </paper-action-dialog>
+
+        <template id="optionsDialogTemplate">
+            <template repeat="{{opt in optSet.options}}">
+                <template if="{{opt.type == OptionType.STRING}}">
+                    <div center horizontal layout>
+                        <div>{{opt.label}}:</div>
+                        <div flex></div>
+                        <div>
+                            <paper-input-decorator label="{{opt.key}}" floatingLabel error="A value is required!" autoValidate>
+                                <input is="core-input" required value="{{opt.value}}" on-input="{{opt.validator}}">
+                            </paper-input-decorator>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template repeat="{{opt in optSet.options}}">
+                <template if="{{opt.type == OptionType.INT}}">
+                    <div center horizontal layout>
+                        <div>{{opt.label}}:</div>
+                        <div flex></div>
+                        <div>
+                            <paper-input-decorator label="{{opt.key}}" floatingLabel error="A value is required!" autoValidate>
+                                <input is="core-input" required value="{{opt.value}}" on-input="{{opt.validator}}">
+                            </paper-input-decorator>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template repeat="{{opt in optSet.options}}">
+                <template if="{{opt.type == OptionType.DROPDOWN}}">
+
+                    <div center horizontal layout>
+                        <div>{{opt.label}}:</div>
+                        <div flex></div>
+                        <div>
+                            <paper-dropdown-menu label="{{opt.key}}">
+                                <paper-dropdown class="dropdown" layered="true">
+                                    <core-menu class="menu" selected="{{opt.value}}">
+                                        <template repeat="{{opt.items}}">
+                                            <paper-item>{{}}</paper-item>
+                                        </template>
+                                    </core-menu>
+                                </paper-dropdown>
+                            </paper-dropdown-menu>
+                        </div>
+                    </div>
+
+                </template>
+            </template>
+
+            <template repeat="{{opt in optSet.options}}">
+                <template if="{{opt.type == OptionType.SLIDER}}">
+                    <div center horizontal layout>
+                        <div>{{opt.key}}</div>
+                        <paper-slider value="{{opt.value}}" max="{{opt.max}}" min="{{opt.min}}" editable></paper-slider>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <paper-action-dialog id="optsDialog" class="optDialog" backdrop  layered="false">
+            <template bind="{{current.type as t}}">
+
+                <template if="{{t == NodeType.OPERATION}}">
+                    <h3>{{current.name}} Options</h3>
+
+                    <template bind ref="optionsDialogTemplate"></template>
+
+                    <paper-button affirmative>Close<core-icon icon="close"></core-icon></paper-button>
+                </template>
+            </template>
+        </paper-action-dialog>
+
+    </template>
+</polymer-element>

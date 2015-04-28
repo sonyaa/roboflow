@@ -1,0 +1,29 @@
+r-instructions {
+    z-index: 10;
+}
+
+.card {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    height: 30px;
+    width: 120px;
+    font-size: 18px;
+    background: #4b2e83;
+    color: #e8e3d3;
+    border-radius: 4px;
+    cursor: default;
+    z-index: 10;
+}
+
+.view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    font-size: 24px;
+    background: #e8e3d3;
+    color: #4b2e83;
+    z-index: 10;
+}

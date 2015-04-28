@@ -1,0 +1,11 @@
+<link rel="import" href="../../../bower_components/core-drag-drop/core-drag-drop.html">
+
+<script src="r-toolbox.js"></script>
+<polymer-element name="r-toolbox">
+    <template>
+        <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
+
+        <content id="nodes" select="*"></content>
+
+    </template>
+</polymer-element>

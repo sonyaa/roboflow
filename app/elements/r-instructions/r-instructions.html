@@ -1,0 +1,42 @@
+<link rel="import" href="../../../bower_components/core-animated-pages/core-animated-pages.html">
+
+<script src="r-instructions.js"></script>
+<polymer-element name="r-instructions">
+    <template>
+        <link rel="stylesheet" href="r-instructions.css">
+
+        <core-animated-pages selected="{{page}}" id="pages" fit transitions="cross-fade-all hero-transition">
+            <section>
+                <div id="container" flex horizontal wrap around-justified layout hero-p>
+                    <div class="card" on-tap="{{toggle}}" vertical center center-justified layout hero-id="instr" hero>
+                        <span>Instructions</span>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <section>
+                    <div class="view" on-tap="{{toggle}}" flex vertical center center-justified layout hero-id="instr" hero>
+                        <h2>Instructions</h2>
+                        <p>Click anywhere on the instructions to close the instructions.</p>
+                        <ul>
+                            <li>RoboFlow is a visual programming language for the PR2 mobile manipulator. It allows
+                            you to </li>
+                            <li>Double-click or drag-and-drop tokens from the toolbox on the
+                                left side of the screen to add them to the canvas.</li>
+                            <li>Click-and-drag items on the canvas to move them around.</li>
+                            <li>Double-click an item on the canvas to see the options for that item.</li>
+                            <li>Click on a plug (filled circle) to connect items. A plug can be connected to a socket
+                            (unfilled circle).</li>
+                            <li>Right-click items in the canvas area to delete them.
+                                <ul>
+                                    <li>Click the X icon to delete an item</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </section>
+        </core-animated-pages>
+
+    </template>
+</polymer-element>
