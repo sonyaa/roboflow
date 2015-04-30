@@ -147,15 +147,6 @@
             serviceType : 'rws_pr2_navigation/GetSavedLocations'
         });
 
-        var savedManipulationData;
-        manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-            savedManipulationData = result;
-        });
-
-        var savedLocationData;
-        locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-            savedLocationData = result;
-        });
         var main = document.querySelector('#mainPage');
 
         main.PreCondType = PreCondType;
@@ -204,27 +195,38 @@
             main.$.mainMenu.selected = -1;
         };
 
-        var savedManipulationNames = [];
-        for (var i = 0; i < savedManipulationData.actions.length; i++) {
-            savedManipulationNames.push(savedManipulationData.actions[i].name);
-        }
-        var savedLocationNames = [];
-        for (i = 0; i < savedLocationData.locations.length; i++) {
-            savedLocationNames.push(savedLocationData.locations[i].name);
-        }
-        main.mOptions = new OptionSet();
-        main.mOptions.addDropDown(
-                "Choose a saved manipulation step",
-                "Manipulation",
-                "This is the manipulation that will be used for this step",
-                savedManipulationNames
-        );
-        main.mOptions.addSlider(
-                "Object similarity",
-                "This setting tell the robot to look for less or more similar objects.",
-                0.01, 0.2, 0.075
-        );
+        manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            var savedManipulationNames = [];
+            for (var i = 0; i < result.actions.length; i++) {
+                savedManipulationNames.push(result.actions[i].name);
+            }
+            main.mOptions = new OptionSet();
+            main.mOptions.addDropDown(
+                    "Choose a saved manipulation step",
+                    "Manipulation",
+                    "This is the manipulation that will be used for this step",
+                    savedManipulationNames
+            );
+            main.mOptions.addSlider(
+                    "Object similarity",
+                    "This setting tell the robot to look for less or more similar objects.",
+                    0.01, 0.2, 0.075
+            );
+        });
 
+        locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            var savedLocationNames = [];
+            for (i = 0; i < result.locations.length; i++) {
+                savedLocationNames.push(result.locations[i].name);
+            }
+            main.lOptions = new OptionSet();
+            main.lOptions.addDropDown(
+                    "Choose a saved location",
+                    "Location",
+                    "This is the location of the robot that will be used for this step",
+                    savedLocationNames
+            );
+        });
         main.hOptions = new OptionSet();
         main.hOptions.addDropDown(
                 "Choose a saved head movement",
@@ -233,13 +235,6 @@
                 ["TODO_head_1",
                     "TODO_2",
                     "TODO_3"]
-        );
-        main.lOptions = new OptionSet();
-        main.lOptions.addDropDown(
-                "Choose a saved location",
-                "Location",
-                "This is the location of the robot that will be used for this step",
-                savedLocationNames
         );
         main.pOptions = new OptionSet();
         main.pOptions.addDropDown(
