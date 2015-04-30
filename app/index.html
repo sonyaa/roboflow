@@ -29,6 +29,8 @@
     <!-- endreplace-->
 
     <script src="scripts/vendor/jquery-1.10.2.min.js"></script>
+    <script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
+    <script src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
 </head>
 <body unresolved fullbleed layout vertical>
 
@@ -128,6 +130,32 @@
     <script src="elements/r-interface/js/OptionSet.js"></script>
 
     <script>
+        //initialize ros library
+        var ros = new ROSLIB.Ros({
+            url : 'ws://localhost:9090'
+        });
+
+        var manipulationDataSrvCli = new ROSLIB.Service({
+            ros : ros,
+            name : '/get_saved_actions',
+            serviceType : 'pr2_pbd_interaction/GetSavedActions'
+        });
+
+        var locationDataSrvCli = new ROSLIB.Service({
+            ros : ros,
+            name : '/get_saved_locations',
+            serviceType : 'rws_pr2_navigation/GetSavedLocations'
+        });
+
+        var savedManipulationData;
+        manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            savedManipulationData = result;
+        });
+
+        var savedLocationData;
+        locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            savedLocationData = result;
+        });
         var main = document.querySelector('#mainPage');
 
         main.PreCondType = PreCondType;
@@ -176,14 +204,20 @@
             main.$.mainMenu.selected = -1;
         };
 
+        var savedManipulationNames = [];
+        for (var i = 0; i < savedManipulationData.actions.length; i++) {
+            savedManipulationNames.push(savedManipulationData.actions[i].name);
+        }
+        var savedLocationNames = [];
+        for (i = 0; i < savedLocationData.locations.length; i++) {
+            savedLocationNames.push(savedLocationData.locations[i].name);
+        }
         main.mOptions = new OptionSet();
         main.mOptions.addDropDown(
                 "Choose a saved manipulation step",
                 "Manipulation",
                 "This is the manipulation that will be used for this step",
-                ["TODO_manipulation_1",
-                    "TODO_2",
-                    "TODO_3"]
+                savedManipulationNames
         );
         main.mOptions.addSlider(
                 "Object similarity",
@@ -205,9 +239,7 @@
                 "Choose a saved location",
                 "Location",
                 "This is the location of the robot that will be used for this step",
-                ["TODO_head_1",
-                    "TODO_2",
-                    "TODO_3"]
+                savedLocationNames
         );
         main.pOptions = new OptionSet();
         main.pOptions.addDropDown(

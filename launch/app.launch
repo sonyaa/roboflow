@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="dataRoot" default="$(env HOME)" />
+  <arg name="manipulationsRoot" value="$(arg dataRoot)/pbd_manipulation_saved/" />
+  <arg name="locationsRoot" value="$(arg dataRoot)/pbd_locations_saved/" />
+  <arg name="file_extension" default=".yaml" />
+
+  <node name="manipulation_manager" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
+    <param name="dataRoot" value="$(arg dataRoot)" />
+    <param name="actionsRoot" value="$(arg manipulationRoot)" />
+    <param name="file_extension" value="$(arg file_extension)" />
+  </node>
+
+  <node name="location_manager" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
+    <param name="dataRoot" value="$(arg dataRoot)" />
+    <param name="locationsRoot" value="$(arg locationsRoot)" />
+    <param name="file_extension" value="$(arg file_extension)" />
+  </node>
+
+</launch>
