@@ -77,7 +77,7 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS src/roboflow
+#  INCLUDE_DIRS src/roboflow
   LIBRARIES roboflow
   CATKIN_DEPENDS rospy
   DEPENDS system_lib
