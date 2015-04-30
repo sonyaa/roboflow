@@ -7,7 +7,7 @@
 
   <node name="manipulation_manager" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
-    <param name="actionsRoot" value="$(arg manipulationRoot)" />
+    <param name="actionsRoot" value="$(arg manipulationsRoot)" />
     <param name="file_extension" value="$(arg file_extension)" />
   </node>
 
