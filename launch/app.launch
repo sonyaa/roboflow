@@ -9,6 +9,7 @@
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="actionsRoot" value="$(arg manipulationsRoot)" />
     <param name="file_extension" value="$(arg file_extension)" />
+    <param name="tabletop_segmentation_service" value="tabletop_segmentation" />
   </node>
 
   <node name="location_manager" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
