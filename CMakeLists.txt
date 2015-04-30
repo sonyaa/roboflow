@@ -8,8 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   actionlib
   std_msgs
-  rws_pr2_navigation
-  pr2_pbd_interaction
 )
 
 ## System dependencies are found with CMake's conventions
