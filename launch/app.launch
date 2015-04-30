@@ -4,12 +4,13 @@
   <arg name="manipulationsRoot" value="$(arg dataRoot)/pbd_manipulation_saved/" />
   <arg name="locationsRoot" value="$(arg dataRoot)/pbd_locations_saved/" />
   <arg name="file_extension" default=".yaml" />
+  <arg name="tabletop_segmentation_service" value="tabletop_segmentation" />
 
-  <node name="manipulation_manager" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
+  <node name="pr2_pbd_interaction" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="actionsRoot" value="$(arg manipulationsRoot)" />
     <param name="file_extension" value="$(arg file_extension)" />
-    <param name="tabletop_segmentation_service" value="tabletop_segmentation" />
+    <param name="tabletop_segmentation_service" value="$(arg tabletop_segmentation_service)" />
   </node>
 
   <node name="location_manager" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
