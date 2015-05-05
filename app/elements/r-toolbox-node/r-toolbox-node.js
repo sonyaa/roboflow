@@ -16,9 +16,12 @@ Polymer('r-toolbox-node', {
         if (this.hasAttribute('start')) {
             this.isStart = true;
             this.type = 'start';
-        } else if (this.hasAttribute('end')) {
+        } else if (this.hasAttribute('end_success')) {
             this.isEnd = true;
-            this.type = 'end';
+            this.type = 'end_success';
+        } else if (this.hasAttribute('end_fail')) {
+            this.isEnd = true;
+            this.type = 'end_fail';
         } else if (this.hasAttribute('operation')) {
             this.isOperation = true;
             this.type = 'operation';

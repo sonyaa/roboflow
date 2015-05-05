@@ -13,7 +13,7 @@
     <param name="tabletop_segmentation_service" value="$(arg tabletop_segmentation_service)" />
   </node>
 
-  <node name="location_manager" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
+  <node name="rws_pr2_navigation" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="locationsRoot" value="$(arg locationsRoot)" />
     <param name="file_extension" value="$(arg file_extension)" />

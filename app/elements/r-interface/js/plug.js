@@ -33,8 +33,8 @@ function Plug(c, n, name, color, radius, offsetX, offsetY) {
         if (thiz.edge !== null) {
             thiz.edge.dispose();
         }
-        thiz.edge = new Edge(thiz.canvas, thiz);
-        thiz.edge.startConnection();
+        var edge = new Edge(thiz.canvas, thiz);
+        edge.startConnection();
     });
 
     this.updateNode = function(n) {

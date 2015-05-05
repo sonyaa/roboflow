@@ -40,6 +40,7 @@ function buildStartNode(tool, x, y, canvas) {
 
     var plug = new Plug(canvas, node, "start", tool.color, plugRadius, (terminalWidth+linkLength)/2+plugRadius, 0);
     node.plugs = [plug];
+    node.targets = [null];
 
     return node;
 }
@@ -84,6 +85,7 @@ function buildEndNode(tool, x, y, canvas) {
         hasControls: false
     });
     node.socket = getSocket(canvas, node, "end", tool.color, socketRadius, -(terminalWidth+linkLength)/2-socketRadius, 0);
+    node.plugs = [];
     return node;
 }
 
@@ -170,6 +172,7 @@ function buildOperationNode(tool, x, y, canvas) {
         numPostCond+numPreCond > 0 ? -linkLength/2 : 0,
         -(tokenHeight + 2*linkLength + conditionHeight*numPreCond + conditionHeight*numPostCond)/2 - socketRadius);
     node.plugs = [];
+    node.targets = [];
     for (i in tool.preConds) {
         if(tool.preConds.hasOwnProperty(i)) {
             node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
@@ -177,6 +180,7 @@ function buildOperationNode(tool, x, y, canvas) {
                 node.width/2 + plugRadius,
                 - conditionHeight * i - (tokenHeight + linkLength)/2 ));
         }
+        node.targets.push(null)
     }
     for (j in tool.postConds) {
         if(tool.postConds.hasOwnProperty(j)) {
@@ -185,11 +189,14 @@ function buildOperationNode(tool, x, y, canvas) {
                 node.width/2 + plugRadius,
                 conditionHeight * j + (tokenHeight + linkLength)/2 + conditionHeight*numPreCond/2));
         }
+        node.targets.push(null)
     }
     node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
         plugRadius,
         numPostCond+numPreCond > 0 ? -linkLength/2 : 0,
         node.height / 2 + plugRadius));
+    node.preConds = tool.preConds;
+    node.postConds = tool.postConds;
     return node;
 }
 

@@ -29,5 +29,6 @@ var Icon = {
 var NodeType = {
     OPERATION: 'operation',
     START: 'start',
-    END: 'end'
+    END_SUCCESS: 'end_success',
+    END_FAIL: 'end_fail'
 };

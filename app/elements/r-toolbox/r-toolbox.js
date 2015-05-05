@@ -1,6 +1,7 @@
 (function() {
     var roboflowCanvas = null;
     var nodeToAdd = null;
+    var nextId = 0;
 
     Polymer('r-toolbox', {
         domReady: function() {
@@ -24,13 +25,15 @@
             var node = dragInfo.event.target;
 
             if(dropTarget.tagName.toLowerCase() === 'canvas') {
+                node.id = nextId;
                 if (node.type && node.type === NodeType.OPERATION) {
                     roboflowCanvas.addOperation(f.x, f.y, node);
                 } else if (node.type && node.type === NodeType.START) {
                     roboflowCanvas.addStart(f.x, f.y, node);
-                }else if (node.type && node.type === NodeType.END) {
+                }else if (node.type && (node.type === NodeType.END_SUCCESS || node.type === NodeType.END_FAIL)) {
                     roboflowCanvas.addEnd(f.x, f.y, node);
                 }
+                nextId ++;
             }
         }
     });

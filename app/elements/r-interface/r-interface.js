@@ -130,6 +130,8 @@
         node.edges.incoming = [];
 
         node.name = tool.name;
+        node.color = tool.color;
+        node.id = tool.id;
 
         node.instance_name = null;
 
@@ -383,10 +385,10 @@
         addEnd: function(x, y, nodeTool) {
             var self = this;
 
-            var pos = setInitialXY(x, y, NodeType.END, nodeTool.$.image);
+            var pos = setInitialXY(x, y, nodeTool.type, nodeTool.$.image);
 
             var node = buildEndNode(nodeTool, pos.x, pos.y, canvas);
-            processNewNode(node, NodeType.END, nodeTool, pos.x, pos.y);
+            processNewNode(node, nodeTool.type, nodeTool, pos.x, pos.y);
 
             var deleteDialog = this.$.deleteDialog;
 
@@ -398,6 +400,18 @@
             canvas.add(node);
 
             return node;
+        },
+
+        validateGraph: function() {
+            if (!areAllPlugsUsed(canvas)) {
+                this.error("All plugs must be connected to sockets.");
+                return;
+            }
+            var graph = getGraphFromCanvas(canvas);
+            var error_msg = getGraphValidationError(graph);
+            if (error_msg !== null) {
+                this.error(error_msg);
+            }
         }
     });
 })();

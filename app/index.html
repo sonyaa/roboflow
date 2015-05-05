@@ -69,8 +69,8 @@
 
                         <r-toolbox layout vertical>
                             <r-toolbox-node src="images/tokens/start.png" name="Start" color="#66FFFF" start></r-toolbox-node>
-                            <r-toolbox-node src="images/tokens/end_success.png" name="Success" color="#33CC33"  end></r-toolbox-node>
-                            <r-toolbox-node src="images/tokens/end_fail.png" name="Fail" color="#FF0000"  end></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/end_success.png" name="Success" color="#33CC33" end_success></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/end_fail.png" name="Fail" color="#FF0000" end_fail></r-toolbox-node>
                         </r-toolbox>
 
                     </core-collapse>
@@ -173,8 +173,9 @@
 //        };
 
         main.download = function() {
+            main.$.rInterface.validateGraph();
             console.log('Downloading action...');
-            main.$.unimplementedDialog.toggle();
+//            main.$.unimplementedDialog.toggle();
         };
 
         main.upload = function() {
