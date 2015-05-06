@@ -59,9 +59,13 @@ function getGraphFromCanvas(canvas) {
     canvas.forEachObject(function(object) {
         var vertex;
         if(object && object.isNode) {
+            var target = null;
             if (object.type == NodeType.START) {
+                if (object.plugs[0].edge != null) {
+                    target = object.plugs[0].edge.to.node.id;
+                }
                 vertex = new StartVertex(object.left, object.top, object.name, object.id, object.color,
-                                        object.plugs[0].edge.to.node.id);
+                                        target);
                 graph.vertices[object.id] = vertex;
                 graph.starts.push(vertex);
             } else if (object.type == NodeType.END_FAIL) {
@@ -74,8 +78,13 @@ function getGraphFromCanvas(canvas) {
                 graph.success_ends.push(vertex);
             } else if (object.type == NodeType.OPERATION) {
                 var targets = [];
-                for (var plug in object.plugs) {
-                    targets.push(plug.edge.to.node.id);
+                for (var i = 0; i < object.plugs.length; i++) {
+                    var plug = object.plugs[i];
+                    target = null;
+                    if (plug.edge != null) {
+                        target = plug.edge.to.node.id;
+                    }
+                    targets.push(target);
                 }
                 vertex = new OperationVertex(object.left, object.top, object.name, object.id, object.color,
                                             object.preConds, object.postConds, targets, object.instance_name);
@@ -90,20 +99,31 @@ function getGraphFromCanvas(canvas) {
 }
 
 function isGraphConnected(graph) {
-    // Assume that graph is valid: has exactly one start, start has exactly one target.
-    var visited = {};
+    var visited = [];
     var stack = [];
+    if (graph.starts.length == 0 || graph.starts[0].targets.length == 0 || graph.starts[0].targets[0] == null) {
+        // Graph is invalid.
+        console.warn('Graph is invalid: start either is absent or is not connected to anything.');
+        return false;
+    }
+    visited[graph.starts[0].id] = true;
     stack.push(graph.starts[0].targets[0]);
     while (stack.length > 0) {
         var nodeId = stack.pop();
         visited[nodeId] = true;
         for (var i = 0; i < graph.vertices[nodeId].targets.length; i++) {
             var targetId = graph.vertices[nodeId].targets[i];
+            if (targetId == null) {
+                // Graph is invalid.
+                console.warn('Graph is invalid: one of the plugs in not connected to anything.');
+                return false;
+            }
             if ((targetId in graph.vertices) && !(targetId in visited)) {
                 stack.push(targetId);
             }
         }
     }
+    // Check that we visited all vertices.
     for (var v in graph.vertices) {
         if (graph.vertices.hasOwnProperty(v)) {
             if (!(v in visited)) {

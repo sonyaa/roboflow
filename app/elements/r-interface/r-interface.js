@@ -411,6 +411,9 @@
             var error_msg = getGraphValidationError(graph);
             if (error_msg !== null) {
                 this.error(error_msg);
+            } else {
+                // This is for debugging purposes - shouldn't be an error.
+                this.error("Graph is valid!")
             }
         }
     });

@@ -43,6 +43,7 @@
 
                     <core-item icon="help" label="Instructions" on-tap="{{instructions}}"></core-item>
                     <!--<core-item icon="settings-applications" label="Settings" on-tap="{{settings}}"></core-item>-->
+                    <core-item icon="validate" label="Validate Action" on-tap="{{validate}}"></core-item>
                     <core-item icon="file-download" label="Save Action" on-tap="{{download}}">
                         <a href="#" target="_self"></a>
                     </core-item>
@@ -172,10 +173,13 @@
 //            main.$.settingsDialog.toggle();
 //        };
 
-        main.download = function() {
+        main.validate = function() {
             main.$.rInterface.validateGraph();
+        };
+
+        main.download = function() {
             console.log('Downloading action...');
-//            main.$.unimplementedDialog.toggle();
+            main.$.unimplementedDialog.toggle();
         };
 
         main.upload = function() {
