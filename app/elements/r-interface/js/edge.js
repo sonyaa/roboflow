@@ -135,6 +135,7 @@ function Edge(c, p) {
             thiz.to.node.updateState();
 
             thiz.from.edge = thiz;
+            thiz.to.edge = thiz;
 
             update();
 
@@ -211,11 +212,12 @@ function Edge(c, p) {
 
         canvas.remove(group);
 
-        this.from.edge = null;
+        thiz.from.edge = null;
         thiz.from.node.off('moving', update);
         thiz.from.node.edges.outgoing.splice($.inArray(thiz, thiz.from), 1);
 
         if(thiz.to) {
+            thiz.to.edge = null;
             thiz.to.node.off('moving', update);
             thiz.to.node.edges.incoming.splice($.inArray(thiz, thiz.to), 1);
         }

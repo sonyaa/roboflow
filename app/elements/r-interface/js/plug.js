@@ -69,6 +69,9 @@ function Plug(c, n, name, color, radius, offsetX, offsetY) {
     this.dispose = function() {
         thiz.container.off();
         thiz.container.remove();
+        if (thiz.edge != null) {
+            thiz.edge.dispose();
+        }
 
         callbacks = [];
     };

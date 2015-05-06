@@ -56,9 +56,11 @@ function getSocket(c, n, name, color, radius, offsetX, offsetY) {
 
 
     socket.dispose = function() {
+        if (socket.edge != null) {
+            socket.edge.dispose();
+        }
         socket.off();
         socket.remove();
-
     };
     //socket.canvas.sockets[]
 
