@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   actionlib
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,9 +50,11 @@ catkin_python_setup()
 #)
 
 ## Generate services in the 'srv' folder
-#add_service_files(
-#  FILES
-#)
+add_service_files(
+  FILES
+  GetSavedRoboflowActions.srv
+  SaveRoboflowAction.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -61,11 +64,9 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  std_msgs
-#  geometry_msgs
-#)
+generate_messages(
+  DEPENDENCIES
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -80,7 +81,7 @@ catkin_package(
 #  INCLUDE_DIRS src/roboflow
   LIBRARIES roboflow
   CATKIN_DEPENDS rospy
-  DEPENDS system_lib
+  DEPENDS system_lib message_runtime
 )
 
 ###########

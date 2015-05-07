@@ -3,20 +3,28 @@
   <arg name="dataRoot" default="$(env HOME)" />
   <arg name="manipulationsRoot" value="$(arg dataRoot)/pbd_manipulation_saved/" />
   <arg name="locationsRoot" value="$(arg dataRoot)/pbd_locations_saved/" />
-  <arg name="file_extension" default=".yaml" />
+  <arg name="actionsRoot" value="$(arg dataRoot)/roboflow_actions_saved/" />
+  <arg name="fileExtension" default=".yaml" />
+  <arg name="roboflowFileExtension" default=".json" />
   <arg name="tabletop_segmentation_service" value="tabletop_segmentation" />
 
   <node name="pr2_pbd_interaction" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="actionsRoot" value="$(arg manipulationsRoot)" />
-    <param name="file_extension" value="$(arg file_extension)" />
+    <param name="fileExtension" value="$(arg fileExtension)" />
     <param name="tabletop_segmentation_service" value="$(arg tabletop_segmentation_service)" />
   </node>
 
   <node name="rws_pr2_navigation" pkg="rws_pr2_navigation" type="location_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="locationsRoot" value="$(arg locationsRoot)" />
-    <param name="file_extension" value="$(arg file_extension)" />
+    <param name="fileExtension" value="$(arg fileExtension)" />
+  </node>
+
+  <node name="roboflow" pkg="roboflow" type="action_manager.py" output="screen">
+    <param name="dataRoot" value="$(arg dataRoot)" />
+    <param name="actionsRoot" value="$(arg actionsRoot)" />
+    <param name="fileExtension" value="$(arg roboflowFileExtension)" />
   </node>
 
 </launch>
