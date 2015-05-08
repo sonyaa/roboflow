@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -44,12 +45,9 @@
                     <core-item icon="help" label="Instructions" on-tap="{{instructions}}"></core-item>
                     <!--<core-item icon="settings-applications" label="Settings" on-tap="{{settings}}"></core-item>-->
                     <core-item icon="validate" label="Validate Action" on-tap="{{validate}}"></core-item>
-                    <core-item icon="file-download" label="Save Action" on-tap="{{download}}">
-                        <a href="#" target="_self"></a>
+                    <core-item icon="file-download" label="Save Action" on-tap="{{save}}"><a href="#" target="_self"></a>
                     </core-item>
-                    <core-item icon="file-upload" label="Load Action" on-tap="{{upload}}">
-                        <a href="#" target="_self"></a>
-                    </core-item>
+                    <core-item icon="file-upload" label="Load Action" on-tap="{{load}}"></core-item>
                     <core-item icon="clear" label="Restart" on-tap="{{restart}}"></core-item>
 
                     <h3 class="clickable" on-tap="{{opsToggle}}">Operations<core-icon icon="{{opsListIcon}}"></core-icon></h3>
@@ -102,6 +100,33 @@
                 <paper-button affirmative autofocus on-click="{{confirmRestart}}">Yes</paper-button>
             </paper-action-dialog>
 
+            <paper-action-dialog id="saveDialog" backdrop autoCloseDisabled layered="false">
+                <p>Enter a name for the action:</p>
+                <paper-input-decorator label="{{$.rInterface.action_name}}">
+                    <input id="actionName" is="core-input">
+                </paper-input-decorator>
+                <paper-button affirmative on-click="{{cancelSave}}">Cancel</paper-button>
+                <paper-button affirmative autofocus on-click="{{confirmSave}}">Save</paper-button>
+            </paper-action-dialog>
+
+            <paper-action-dialog id="loadDialog" backdrop autoCloseDisabled layered="false">
+                <p>This will delete the action currently in the interface, and <b><em>is not reversible!</em></b>
+                Be sure to save your current action before loading another one.</p>
+                <p>Select a program you wish to load:</p>
+                <paper-dropdown-menu>
+                    <paper-dropdown class="dropdown" layered="true">
+                        <core-menu class="menu">
+                            <template repeat="{{action in $.rInterface.actions}}">
+                                <paper-item>{{action.name}}</paper-item>
+                            </template>
+                        </core-menu>
+                    </paper-dropdown>
+                </paper-dropdown-menu>
+                <paper-button affirmative autofocus on-click="{{cancelLoad}">Cancel</paper-button>
+                <paper-button affirmative autofocus on-click="{{confirmLoad}}">Select</paper-button>
+            </paper-action-dialog>
+
+
             <!--<paper-action-dialog id="settingsDialog" backdrop autoCloseDisabled layered="false">-->
                 <!--<h3>RoboFlow Settings</h3>-->
 
@@ -148,6 +173,18 @@
             serviceType : 'rws_pr2_navigation/GetSavedLocations'
         });
 
+        var actionDataSrvCli = new ROSLIB.Service({
+            ros : ros,
+            name : '/get_saved_roboflow_actions',
+            serviceType : 'roboflow/GetSavedRoboflowActions'
+        });
+
+        var saveActionSrvCli = new ROSLIB.Service({
+            ros : ros,
+            name : '/save_roboflow_action',
+            serviceType : 'roboflow/SaveRoboflowAction'
+        });
+
         var main = document.querySelector('#mainPage');
 
         main.PreCondType = PreCondType;
@@ -177,14 +214,40 @@
             main.$.rInterface.validateGraph();
         };
 
-        main.download = function() {
-            console.log('Downloading action...');
-            main.$.unimplementedDialog.toggle();
+        main.save = function() {
+            main.$.saveDialog.toggle();
         };
 
-        main.upload = function() {
-            console.log('Uploading action...');
-            main.$.unimplementedDialog.toggle();
+        main.confirmSave = function() {
+            console.log('Saving action...');
+            main.$.rInterface.action_name = main.$.actionName.value;
+            var actionData = main.$.rInterface.getActionData();
+            if (actionData[1] != null) {
+                saveActionSrvCli.callService(new ROSLIB.ServiceRequest({
+                                                    'action_id': actionData[0],
+                                                    'action_str': actionData[1]
+                                                }), function (result) {
+                                                    console.log('Saved action');
+                                                });
+            }
+            getSavedActions();
+        };
+        main.cancelSave = function() {
+            console.log('canceled save');
+        };
+
+        main.load = function() {
+            console.log('Loading action...');
+            main.$.loadDialog.toggle();
+        };
+
+        main.confirmLoad = function() {
+            console.log('Loading action...');
+//            main.$.rInterface.loadAction(main.$.actionName.value);
+        };
+
+        main.cancelLoad = function() {
+            console.log('canceled load');
         };
 
         main.restart = function() {
@@ -221,7 +284,7 @@
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
             var savedLocationNames = [];
-            for (i = 0; i < result.locations.length; i++) {
+            for (var i = 0; i < result.locations.length; i++) {
                 savedLocationNames.push(result.locations[i].name);
             }
             main.lOptions = new OptionSet();
@@ -233,6 +296,8 @@
             );
         });
         main.hOptions = new OptionSet();
+
+        //TODO populate options with state
         main.hOptions.addDropDown(
                 "Choose a saved head movement",
                 "Head position",
@@ -251,7 +316,29 @@
                     "TODO_3"]
         );
 
-        //TODO populate options with state
+        getSavedActions();
+
+        function getSavedActions() {
+            actionDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+                var savedActionNames = [];
+                var savedActions = [];
+                for (var i = 0; i < result.actions.length; i++) {
+                    if (result.actions[i] !== "") {
+                        var action = JSON.parse(result.actions[i]);
+                        savedActions.push(action);
+                        savedActionNames.push(action['name']);
+                    }
+                }
+                main.$.rInterface.actions = savedActions;
+                main.pOptions = new OptionSet();
+                main.pOptions.addDropDown(
+                        "Choose a saved procedure",
+                        "Procedure",
+                        "This is the procedure that will be used for this step",
+                        savedActionNames
+                );
+            });
+        }
 
     </script>
 </body>

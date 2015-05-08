@@ -174,7 +174,10 @@
             errorMsg: '',
             infoMsg: '',
             current: {},
-            optSet: []
+            optSet: [],
+            actions: [],
+            action_id: null,
+            action_name: null
         },
 
         observe: {
@@ -422,6 +425,22 @@
             } else {
                 this.info("Graph is valid!")
             }
+        },
+
+        getActionData: function() {
+            var graph = getGraphFromCanvas(canvas);
+            if (this.action_id == null) {
+                var id = 0;
+                for (var i = 0; i < this.actions.length; i++) {
+                    if (this.actions[i].id > id) {
+                        id = this.actions[i].id + 1;
+                    }
+                }
+                this.action_id = id;
+            }
+            graph.id = this.action_id;
+            graph.name = this.action_name;
+            return [graph.id, JSON.stringify(graph)];
         }
     });
 })();
