@@ -10,7 +10,7 @@ import roslib
 roslib.load_manifest('roboflow')
 
 
-def save_action(req):
+def save_roboflow_action(req):
     data_directory = rospy.get_param('/roboflow/actionsRoot')
     file_extension = rospy.get_param('/roboflow/fileExtension', '.json')
     file_name = data_directory + str(req.action_id) + file_extension
@@ -22,7 +22,7 @@ def save_action(req):
     pass
 
 
-def get_saved_actions(dummy):
+def get_saved_roboflow_actions(dummy):
     actions = []
     data_directory = rospy.get_param('/roboflow/actionsRoot')
     file_extension = rospy.get_param('/roboflow/fileExtension', '.json')
@@ -38,6 +38,6 @@ def get_saved_actions(dummy):
 
 if __name__ == '__main__':
     rospy.init_node('roboflow_action_manager')
-    rospy.Service('get_saved_actions', GetSavedRoboflowActions, get_saved_actions)
-    rospy.Service('save_action', SaveRoboflowAction, save_action)
+    rospy.Service('get_saved_roboflow_actions', GetSavedRoboflowActions, get_saved_roboflow_actions)
+    rospy.Service('save_roboflow_action', SaveRoboflowAction, save_roboflow_action)
     rospy.spin()
