@@ -2,7 +2,8 @@
 import os
 from os import listdir
 from os.path import isfile, join
-from roboflow.srv import GetSavedRoboflowActions, SaveRoboflowAction, GetSavedRoboflowActionsResponse
+from roboflow.srv import GetSavedRoboflowActions, SaveRoboflowAction, GetSavedRoboflowActionsResponse, \
+    SaveRoboflowActionResponse
 import rospy
 
 import roslib
@@ -19,7 +20,7 @@ def save_roboflow_action(req):
     act_file = open(file_name, 'w')
     act_file.write(req.action_str)
     act_file.close()
-    pass
+    return SaveRoboflowActionResponse()
 
 
 def get_saved_roboflow_actions(dummy):
