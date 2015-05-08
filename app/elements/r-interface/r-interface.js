@@ -172,6 +172,7 @@
             horizontalOffset: '256px',
             verticalOffset: '65px',
             errorMsg: '',
+            infoMsg: '',
             current: {},
             optSet: []
         },
@@ -305,6 +306,13 @@
             this.errorMsg = '';
         },
 
+        info: function(msg) {
+            $(this.$.infoMsg).empty();
+            this.infoMsg = msg;
+            this.injectBoundHTML('{{infoMsg}}', this.$.infoMsg);
+            this.$.infoDialog.toggle();
+        },
+
         setOptionsView: function(node, optSet) {
             this.current = node;
             this.optSet = optSet;
@@ -412,8 +420,7 @@
             if (error_msg !== null) {
                 this.error(error_msg);
             } else {
-                // This is for debugging purposes - shouldn't be an error.
-                this.error("Graph is valid!")
+                this.info("Graph is valid!")
             }
         }
     });

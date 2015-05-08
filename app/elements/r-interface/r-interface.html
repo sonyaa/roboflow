@@ -45,6 +45,13 @@
             <paper-button affirmative on-click="{{clearError}}">Ok</paper-button>
         </paper-action-dialog>
 
+        <paper-action-dialog id="infoDialog" >
+            <p id="infoMsg"></p>
+        </paper-action-dialog>
+        <!--<paper-dialog id="infoDialog">-->
+            <!--<p id="infoMsg"></p>-->
+        <!--</paper-dialog>-->
+
         <template id="optionsDialogTemplate">
             <template repeat="{{opt in optSet.options}}">
                 <template if="{{opt.type == OptionType.STRING}}">
