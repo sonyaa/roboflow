@@ -2,7 +2,7 @@
 <launch>
   <arg name="dataRoot" default="$(env HOME)" />
   <arg name="manipulationsRoot" value="$(arg dataRoot)/pbd_manipulation_saved/" />
-  <arg name="locationsRoot" value="$(arg dataRoot)/pbd_locations_saved/" />
+  <arg name="locationsRoot" value="$(arg dataRoot)/pbd_location_saved/" />
   <arg name="actionsRoot" value="$(arg dataRoot)/roboflow_actions_saved/" />
   <arg name="fileExtension" default=".yaml" />
   <arg name="roboflowFileExtension" default=".json" />
