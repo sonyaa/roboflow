@@ -349,7 +349,7 @@
         addOperation: function(x, y, nodeTool) {
             var self = this;
 
-            var pos = setInitialXY(x, y, NodeType.OPERATION, nodeTool.$.image);
+            var pos = setInitialXY(x, y, NodeType.OPERATION);
 
             var node = buildOperationNode(nodeTool, pos.x, pos.y, canvas);
             processNewNode(node, NodeType.OPERATION, nodeTool, pos.x, pos.y);
@@ -375,7 +375,7 @@
         addStart: function(x, y, nodeTool) {
             var self = this;
 
-            var pos = setInitialXY(x, y, NodeType.START, nodeTool.$.image);
+            var pos = setInitialXY(x, y, NodeType.START);
 
             var node = buildStartNode(nodeTool, pos.x, pos.y, canvas);
             processNewNode(node, NodeType.START, nodeTool, pos.x, pos.y);
@@ -396,7 +396,7 @@
         addEnd: function(x, y, nodeTool) {
             var self = this;
 
-            var pos = setInitialXY(x, y, nodeTool.type, nodeTool.$.image);
+            var pos = setInitialXY(x, y, nodeTool.type);
 
             var node = buildEndNode(nodeTool, pos.x, pos.y, canvas);
             processNewNode(node, nodeTool.type, nodeTool, pos.x, pos.y);
@@ -441,6 +441,48 @@
             graph.id = this.action_id;
             graph.name = this.action_name;
             return [graph.id, JSON.stringify(graph)];
+        },
+
+        loadAction: function(action_id) {
+            var new_action = null;
+            for (var i = 0; i < this.actions.length; i++) {
+                if (this.actions[i].id == action_id) {
+                    new_action = this.actions[i];
+                    break;
+                }
+            }
+            if (new_action == null) {
+                console.warn("Couldn't find action with id " + action_id);
+                return;
+            }
+            console.log("Loading action with id " + action_id)
+            this.restart();
+            this.showActionInCanvas(new_action);
+        },
+
+        showActionInCanvas: function(graph) {
+            var tool;
+            for (var i = 0; i < graph.starts.length; i++) {
+                tool = graph.starts[i];
+                tool.type = NodeType.START;
+                this.addStart(tool.x, tool.y, tool);
+            }
+            for (var i = 0; i < graph.fail_ends.length; i++) {
+                tool = graph.fail_ends[i];
+                tool.type = NodeType.END_FAIL;
+                this.addEnd(tool.x, tool.y, tool);
+            }
+            for (var i = 0; i < graph.success_ends.length; i++) {
+                tool = graph.success_ends[i];
+                tool.type = NodeType.END_SUCCESS;
+                this.addEnd(tool.x, tool.y, tool);
+            }
+            for (var i = 0; i < graph.operations.length; i++) {
+                tool = graph.operations[i];
+                tool.type = NodeType.OPERATION;
+                this.addOperation(tool.x, tool.y, tool);
+            }
+
         }
     });
 })();

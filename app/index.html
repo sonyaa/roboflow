@@ -115,9 +115,9 @@
                 <p>Select a program you wish to load:</p>
                 <paper-dropdown-menu>
                     <paper-dropdown class="dropdown" layered="true">
-                        <core-menu class="menu">
+                        <core-menu class="menu" id="saved_action_menu">
                             <template repeat="{{action in $.rInterface.actions}}">
-                                <paper-item>{{action.name}}</paper-item>
+                                <paper-item actionid="{{action.id}}">{{action.name}}</paper-item>
                             </template>
                         </core-menu>
                     </paper-dropdown>
@@ -158,7 +158,7 @@
     <script>
         //initialize ros library
         var ros = new ROSLIB.Ros({
-            url : 'ws://localhost:9090'
+            url : 'ws://' + window.location.hostname + ':9090'
         });
 
         var manipulationDataSrvCli = new ROSLIB.Service({
@@ -243,7 +243,10 @@
 
         main.confirmLoad = function() {
             console.log('Loading action...');
-//            main.$.rInterface.loadAction(main.$.actionName.value);
+            var selected_item = document.querySelector('#saved_action_menu').selectedItem;
+            if (selected_item) {
+                main.$.rInterface.loadAction(selected_item.getAttribute("actionid"));
+            }
         };
 
         main.cancelLoad = function() {
