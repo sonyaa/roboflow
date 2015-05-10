@@ -466,28 +466,51 @@
 
         showActionInCanvas: function(graph) {
             var tool;
+            var node;
+            var nodesDict = {};
             for (var i = 0; i < graph.starts.length; i++) {
                 tool = graph.starts[i];
                 tool.type = NodeType.START;
-                this.addStart(tool.x, tool.y, tool);
+                node = this.addStart(tool.x, tool.y, tool);
+                node.targets = tool.targets;
+                nodesDict[node.id] = node;
             }
             for (var i = 0; i < graph.fail_ends.length; i++) {
                 tool = graph.fail_ends[i];
                 tool.type = NodeType.END_FAIL;
-                this.addEnd(tool.x, tool.y, tool);
+                node = this.addEnd(tool.x, tool.y, tool);
+                node.targets = tool.targets;
+                nodesDict[node.id] = node;
             }
             for (var i = 0; i < graph.success_ends.length; i++) {
                 tool = graph.success_ends[i];
                 tool.type = NodeType.END_SUCCESS;
-                this.addEnd(tool.x, tool.y, tool);
+                node = this.addEnd(tool.x, tool.y, tool);
+                node.targets = tool.targets;
+                nodesDict[node.id] = node;
             }
             for (var i = 0; i < graph.operations.length; i++) {
                 tool = graph.operations[i];
                 tool.type = NodeType.OPERATION;
                 tool.optSet = this.optionSetDict[tool.operationType]
-                this.addOperation(tool.x, tool.y, tool);
+                node = this.addOperation(tool.x, tool.y, tool);
+                node.targets = tool.targets;
+                nodesDict[node.id] = node;
             }
-
+            // add edges
+            canvas.forEachObject(function(object) {
+                var vertex;
+                if (object && object.isNode) {
+                    for (var i = 0; i < object.targets.length; i++) {
+                        if (node.targets[i] != null) {
+                            var socket = nodesDict[node.targets[i]];
+                            var edge = new Edge(canvas, node.plugs[i]);
+                            edge.connect(socket);
+                        }
+                    }
+                }
+            });
         }
+
     });
 })();
