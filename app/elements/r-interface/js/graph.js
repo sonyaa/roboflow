@@ -16,7 +16,7 @@ function EndVertex(x,y,name,id,color) {
     this.targets = [];
 }
 
-function OperationVertex(x,y,name,id,color,preConds,postConds,targets,step) {
+function OperationVertex(x,y,name,id,color,preConds,postConds,targets,step,type) {
     this.x = x;
     this.y = y;
     this.name = name;
@@ -26,6 +26,7 @@ function OperationVertex(x,y,name,id,color,preConds,postConds,targets,step) {
     this.postConds = postConds;
     this.targets = targets;
     this.step = step;
+    this.operationType = type;
 }
 
 function areAllPlugsUsed(canvas) {
@@ -87,7 +88,8 @@ function getGraphFromCanvas(canvas) {
                     targets.push(target);
                 }
                 vertex = new OperationVertex(object.left, object.top, object.name, object.id, object.color,
-                                            object.preConds, object.postConds, targets, object.instance_name);
+                                            object.preConds, object.postConds, targets,
+                                            object.instance_name, object.operationType);
                 graph.vertices[object.id] = vertex;
                 graph.operations.push(vertex);
             } else {

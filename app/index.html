@@ -55,10 +55,16 @@
 
                         <r-toolbox layout vertical>
                             <r-toolbox-node src="images/tokens/manipulation.png" name="Manipulation" optSet="{{mOptions}}"
-                                              preConds="{{[PreCondType.OBJECTS, PreCondType.REACHABLE]}}" postConds="{{[PostCondType.SUCCESS]}}" color="#0000FF" operation></r-toolbox-node>
-                            <r-toolbox-node src="images/tokens/navigation.png" name="Navigation" optSet="{{lOptions}}" postConds="{{[PostCondType.SUCCESS]}}" color="#F000FF" operation></r-toolbox-node>
-                            <r-toolbox-node src="images/tokens/move_head.png" name="Head Movement" optSet="{{hOptions}}" color="#A000FF" operation></r-toolbox-node>
-                            <r-toolbox-node src="images/tokens/procedure.png" name="Saved Procedure" optSet="{{pOptions}}" postConds="{{[PostCondType.SUCCESS]}}" color="#FFF000" operation></r-toolbox-node>
+                                              preConds="{{[PreCondType.OBJECTS, PreCondType.REACHABLE]}}" postConds="{{[PostCondType.SUCCESS]}}"
+                                            color="#0000FF" operationType="{{OperationType.MANIPULATION}}"></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/navigation.png" name="Navigation" optSet="{{lOptions}}"
+                                            postConds="{{[PostCondType.SUCCESS]}}" color="#F000FF"
+                                            operationType="{{OperationType.NAVIGATION}}"></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/move_head.png" name="Head Movement" optSet="{{hOptions}}"
+                                            color="#A000FF" operationType="{{OperationType.HEAD}}"></r-toolbox-node>
+                            <r-toolbox-node src="images/tokens/procedure.png" name="Saved Procedure" optSet="{{pOptions}}"
+                                            postConds="{{[PostCondType.SUCCESS]}}" color="#FFF000"
+                                            operationType="{{OperationType.PROCEDURE}}"></r-toolbox-node>
                         </r-toolbox>
 
                     </core-collapse>
@@ -167,6 +173,12 @@
             serviceType : 'pr2_pbd_interaction/GetSavedActions'
         });
 
+        var headDataSrvCli = new ROSLIB.Service({
+            ros : ros,
+            name : '/get_saved_head_poses',
+            serviceType : 'pr2_pbd_interaction/GetSavedHeadPoses'
+        });
+
         var locationDataSrvCli = new ROSLIB.Service({
             ros : ros,
             name : '/get_saved_locations',
@@ -189,6 +201,7 @@
 
         main.PreCondType = PreCondType;
         main.PostCondType = PostCondType;
+        main.OperationType = OperationType;
         main.opsListIcon = 'expand-more';
         main.terminalsListIcon = 'expand-more';
 
@@ -283,6 +296,7 @@
                     "This setting tell the robot to look for less or more similar objects.",
                     0.01, 0.2, 0.075
             );
+            main.$.rInterface.optionSetsDict[OperationType.MANIPULATION] = main.mOptions;
         });
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
@@ -297,27 +311,23 @@
                     "This is the location of the robot that will be used for this step",
                     savedLocationNames
             );
+            main.$.rInterface.optionSetsDict[OperationType.NAVIGATION] = main.lOptions;
         });
-        main.hOptions = new OptionSet();
 
-        //TODO populate options with state
-        main.hOptions.addDropDown(
-                "Choose a saved head movement",
-                "Head position",
-                "This is the position of the robot's head that will be used for this step",
-                ["TODO_head_1",
-                    "TODO_2",
-                    "TODO_3"]
-        );
-        main.pOptions = new OptionSet();
-        main.pOptions.addDropDown(
-                "Choose a saved procedure",
-                "Procedure",
-                "This is the procedure that will be used for this step",
-                ["TODO_head_1",
-                    "TODO_2",
-                    "TODO_3"]
-        );
+        headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            var savedHeadPoseNames = [];
+            for (var i = 0; i < result.poses.length; i++) {
+                savedHeadPoseNames.push(result.poses[i].name);
+            }
+            main.hOptions = new OptionSet();
+            main.hOptions.addDropDown(
+                    "Choose a saved head movement",
+                    "Head position",
+                    "This is the position of the robot's head that will be used for this step",
+                    savedHeadPoseNames
+            );
+            main.$.rInterface.optionSetsDict[OperationType.HEAD] = main.hOptions;
+        });
 
         getSavedActions();
 
@@ -340,6 +350,7 @@
                         "This is the procedure that will be used for this step",
                         savedActionNames
                 );
+                main.$.rInterface.optionSetsDict[OperationType.PROCEDURE] = main.pOptions;
             });
         }
 

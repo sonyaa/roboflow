@@ -32,3 +32,10 @@ var NodeType = {
     END_SUCCESS: 'end_success',
     END_FAIL: 'end_fail'
 };
+
+var OperationType = {
+    MANIPULATION: 'Manipulation',
+    HEAD: 'Head movement',
+    NAVIGATION: 'Navigation',
+    PROCEDURE: 'Procedure'
+};

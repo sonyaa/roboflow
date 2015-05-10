@@ -9,7 +9,8 @@ Polymer('r-toolbox-node', {
         type: '',
         isStart: false,
         isEnd: false,
-        isOperation: false
+        isOperation: false,
+        operationType: []
     },
 
     ready: function() {
@@ -22,7 +23,7 @@ Polymer('r-toolbox-node', {
         } else if (this.hasAttribute('end_fail')) {
             this.isEnd = true;
             this.type = 'end_fail';
-        } else if (this.hasAttribute('operation')) {
+        } else if (this.hasAttribute('operationType')) {
             this.isOperation = true;
             this.type = 'operation';
         }

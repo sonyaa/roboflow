@@ -141,8 +141,11 @@
             node.isComplete = true;
         };
 
-        if(type === NodeType.OPERATION && tool.optSet && tool.optSet.hasOptions) {
-            node.optSet = tool.optSet.clone();
+        if(type === NodeType.OPERATION) {
+            node.operationType = tool.operationType;
+            if (tool.optSet && tool.optSet.hasOptions) {
+                node.optSet = tool.optSet.clone();
+            }
         }
 
         //Define where the node can be in the interface
@@ -177,7 +180,8 @@
             optSet: [],
             actions: [],
             action_id: null,
-            action_name: null
+            action_name: null,
+            optionSetDict: {}
         },
 
         observe: {
@@ -455,7 +459,7 @@
                 console.warn("Couldn't find action with id " + action_id);
                 return;
             }
-            console.log("Loading action with id " + action_id)
+            console.log("Loading action with id " + action_id);
             this.restart();
             this.showActionInCanvas(new_action);
         },
@@ -480,6 +484,7 @@
             for (var i = 0; i < graph.operations.length; i++) {
                 tool = graph.operations[i];
                 tool.type = NodeType.OPERATION;
+                tool.optSet = this.optionSetDict[tool.operationType]
                 this.addOperation(tool.x, tool.y, tool);
             }
 
