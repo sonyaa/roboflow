@@ -296,7 +296,7 @@
                     "This setting tell the robot to look for less or more similar objects.",
                     0.01, 0.2, 0.075
             );
-            main.$.rInterface.optionSetsDict[OperationType.MANIPULATION] = main.mOptions;
+            main.$.rInterface.optionSetDict[OperationType.MANIPULATION] = main.mOptions;
         });
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
@@ -311,7 +311,7 @@
                     "This is the location of the robot that will be used for this step",
                     savedLocationNames
             );
-            main.$.rInterface.optionSetsDict[OperationType.NAVIGATION] = main.lOptions;
+            main.$.rInterface.optionSetDict[OperationType.NAVIGATION] = main.lOptions;
         });
 
         headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
@@ -326,7 +326,7 @@
                     "This is the position of the robot's head that will be used for this step",
                     savedHeadPoseNames
             );
-            main.$.rInterface.optionSetsDict[OperationType.HEAD] = main.hOptions;
+            main.$.rInterface.optionSetDict[OperationType.HEAD] = main.hOptions;
         });
 
         getSavedActions();
@@ -350,7 +350,7 @@
                         "This is the procedure that will be used for this step",
                         savedActionNames
                 );
-                main.$.rInterface.optionSetsDict[OperationType.PROCEDURE] = main.pOptions;
+                main.$.rInterface.optionSetDict[OperationType.PROCEDURE] = main.pOptions;
             });
         }
 
