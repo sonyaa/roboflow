@@ -164,7 +164,7 @@
     <script>
         //initialize ros library
         var ros = new ROSLIB.Ros({
-            url : 'ws://' + window.location.hostname + ':9090'
+            url : 'ws://' + window.location.hostname + ':9091'
         });
 
         var manipulationDataSrvCli = new ROSLIB.Service({
@@ -316,8 +316,8 @@
 
         headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
             var savedHeadPoseNames = [];
-            for (var i = 0; i < result.poses.length; i++) {
-                savedHeadPoseNames.push(result.poses[i].name);
+            for (var i = 0; i < result.head_poses.length; i++) {
+                savedHeadPoseNames.push(result.head_poses[i].name);
             }
             main.hOptions = new OptionSet();
             main.hOptions.addDropDown(
