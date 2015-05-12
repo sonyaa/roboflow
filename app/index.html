@@ -201,11 +201,6 @@
         var main = document.querySelector('#mainPage');
 
 
-        main.$.rInterface.executionServices[OperationType.HEAD] = new ROSLIB.Service({
-            ros : ros,
-            name : '/execute_head_step',
-            serviceType : 'pr2_pbd_interaction/ExecuteHeadStep'
-        });
 
         //TODO add other execution services
 
@@ -341,6 +336,11 @@
                     savedHeadPoses
             );
             main.$.rInterface.optionSetDict[OperationType.HEAD] = main.hOptions;
+            main.$.rInterface.executionServices[OperationType.HEAD] = new ROSLIB.Service({
+                ros : ros,
+                name : '/execute_head_step',
+                serviceType : 'pr2_pbd_interaction/ExecuteHeadStep'
+            });
         });
 
         getSavedActions();

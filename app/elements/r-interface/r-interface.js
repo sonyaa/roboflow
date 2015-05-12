@@ -431,7 +431,7 @@
                 this.error(error_msg);
                 return null;
             } else {
-                this.info("Graph is valid!");
+                //this.info("Graph is valid!");
                 return graph;
             }
         },
@@ -440,13 +440,20 @@
             var graph = this.validateGraph();
             if (graph != null) {
                 // If we're here, it means graph is valid: one start, all nodes connected etc.
+                // Need to check that all steps are instantiated!
                 var curVertexId = graph.starts[0].targets[0];
                 var gotResponse = true;
+                var reqTime = 0;
                 while (true) {
                     if (!gotResponse) {
+                        if ( Math.floor((new Date() - reqTime)/60000) > 0.5 ) {
+                            // Timeout after 30 seconds.
+                            // TODO the timeout maybe should depend on the type of operation
+                            this.error('Timeout while waiting for execution result; action aborted!');
+                            break;
+                        }
                         continue;
                     }
-                    gotResponse = false;
                     var curVertex = graph.vertices[curVertexId];
                     if (curVertex.type == NodeType.END_SUCCESS) {
                         this.info('Action completed successfully!');
@@ -456,6 +463,8 @@
                         break;
                     } else if (curVertex.type == NodeType.OPERATION) {
                         // TODO check preconditions
+                        gotResponse = false;
+                        reqTime =  new Date();
                         this.executionServices[curVertex.operationType].callService(new ROSLIB.ServiceRequest({
                                                 'step_id': curVertex.step_id
                                             }), function (result) {
