@@ -17,6 +17,7 @@ def save_roboflow_action(req):
     file_name = data_directory + str(req.action_id) + file_extension
     if not os.path.exists(data_directory):
         os.makedirs(data_directory)
+    rospy.loginfo('Saving action to file ' + file_name)
     act_file = open(file_name, 'w')
     act_file.write(req.action_str)
     act_file.close()
@@ -34,6 +35,8 @@ def get_saved_roboflow_actions(dummy):
         if isfile(file_path) and file_path.endswith(file_extension):
             with open(file_path, 'r') as content_file:
                 actions.append(content_file.read())
+                rospy.loginfo('Getting action from file ' + file_path)
+    rospy.loginfo('Loaded ' + str(len(actions)) + ' file(s).')
     return GetSavedRoboflowActionsResponse(actions)
 
 
