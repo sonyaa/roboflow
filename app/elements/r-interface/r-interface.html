@@ -92,7 +92,7 @@
                                 <paper-dropdown class="dropdown" layered="true">
                                     <core-menu class="menu" selected="{{opt.value}}">
                                         <template repeat="{{item in opt.items}}">
-                                            <paper-item>{{item.name}}</paper-item>
+                                            <paper-item>{{item[0]}}</paper-item>
                                         </template>
                                     </core-menu>
                                 </paper-dropdown>
