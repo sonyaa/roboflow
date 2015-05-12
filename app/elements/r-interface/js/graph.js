@@ -25,7 +25,7 @@ function OperationVertex(x,y,name,id,color,preConds,postConds,targets,step,type)
     this.preConds = preConds;
     this.postConds = postConds;
     this.targets = targets;
-    this.step = step;
+    this.step_id = step;
     this.operationType = type;
 }
 
@@ -89,12 +89,13 @@ function getGraphFromCanvas(canvas) {
                 }
                 vertex = new OperationVertex(object.left, object.top, object.name, object.id, object.color,
                                             object.preConds, object.postConds, targets,
-                                            object.instance_name, object.operationType);
+                                            object.step_id, object.operationType);
                 graph.vertices[object.id] = vertex;
                 graph.operations.push(vertex);
             } else {
                 console.warn("Unknown node type")
             }
+            vertex.type = object.type;
         }
     });
     return graph;

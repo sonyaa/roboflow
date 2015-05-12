@@ -91,8 +91,8 @@
                             <paper-dropdown-menu label="{{opt.key}}">
                                 <paper-dropdown class="dropdown" layered="true">
                                     <core-menu class="menu" selected="{{opt.value}}">
-                                        <template repeat="{{opt.items}}">
-                                            <paper-item>{{}}</paper-item>
+                                        <template repeat="{{item in opt.items}}">
+                                            <paper-item>{{item.name}}</paper-item>
                                         </template>
                                     </core-menu>
                                 </paper-dropdown>

@@ -133,7 +133,7 @@
         node.color = tool.color;
         node.id = tool.id;
 
-        node.instance_name = null;
+        node.step_id = null;
 
         node.updateState = function () {
             console.log('Updating state of ' + node.name);
@@ -181,7 +181,8 @@
             actions: [],
             action_id: null,
             action_name: null,
-            optionSetDict: {}
+            optionSetDict: {},
+            executionServices: {}
         },
 
         observe: {
@@ -344,8 +345,10 @@
 
         processOptions: function(oldValue, newValue) {
             if (newValue >= 0) {
-                this.current.instance_name = this.optSet.options[0].items[newValue];
-                this.current.item(0).item(0).set({'text':this.current.name + '\n(' + this.current.instance_name + ')'});
+                // items[i]: [name, id]
+                this.current.step_id = this.optSet.options[0].items[newValue][1];
+                var step_name = this.optSet.options[0].items[newValue][0];
+                this.current.item(0).item(0).set({'text':this.current.name + '\n(' + step_name + ')'});
                 this.current.canvas.renderAll();
             }
         },
@@ -420,14 +423,60 @@
         validateGraph: function() {
             if (!areAllPlugsUsed(canvas)) {
                 this.error("All plugs must be connected to sockets.");
-                return;
+                return null;
             }
             var graph = getGraphFromCanvas(canvas);
             var error_msg = getGraphValidationError(graph);
             if (error_msg !== null) {
                 this.error(error_msg);
+                return null;
             } else {
-                this.info("Graph is valid!")
+                this.info("Graph is valid!");
+                return graph;
+            }
+        },
+
+        executeGraph: function() {
+            var graph = this.validateGraph();
+            if (graph != null) {
+                // If we're here, it means graph is valid: one start, all nodes connected etc.
+                var curVertexId = graph.starts[0].targets[0];
+                var gotResponse = true;
+                while (true) {
+                    if (!gotResponse) {
+                        continue;
+                    }
+                    gotResponse = false;
+                    var curVertex = graph.vertices[curVertexId];
+                    if (curVertex.type == NodeType.END_SUCCESS) {
+                        this.info('Action completed successfully!');
+                        break;
+                    } else if (curVertex.type == NodeType.END_FAIL) {
+                        this.info('Action failed.');
+                        break;
+                    } else if (curVertex.type == NodeType.OPERATION) {
+                        // TODO check preconditions
+                        this.executionServices[curVertex.operationType].callService(new ROSLIB.ServiceRequest({
+                                                'step_id': curVertex.step_id
+                                            }), function (result) {
+                                                console.log('Received execution status: ' + result.status);
+                                                if (!status) {
+                                                    curVertexId = curVertex.targets[curVertex.preConds.length]
+                                                } else {
+                                                    // This assumes either exactly one postcondition - the "Success?" one,
+                                                    // or zero postconditions - as for the HeadStep.
+                                                    curVertexId = curVertex.targets[curVertex.preConds.length+curVertex.postConds.length]
+                                                }
+                                                gotResponse = true;
+                                            });
+
+                        // TODO check postconditions
+                    } else {
+                        console.warn('Invalid node type: ' + curVertex.type);
+                        break;
+                    }
+                }
+
             }
         },
 
@@ -468,31 +517,32 @@
             var tool;
             var node;
             var nodesDict = {};
-            for (var i = 0; i < graph.starts.length; i++) {
+            var i;
+            for (i = 0; i < graph.starts.length; i++) {
                 tool = graph.starts[i];
                 tool.type = NodeType.START;
                 node = this.addStart(tool.x, tool.y, tool);
                 node.targets = tool.targets;
                 nodesDict[node.id] = node;
             }
-            for (var i = 0; i < graph.fail_ends.length; i++) {
+            for (i = 0; i < graph.fail_ends.length; i++) {
                 tool = graph.fail_ends[i];
                 tool.type = NodeType.END_FAIL;
                 node = this.addEnd(tool.x, tool.y, tool);
                 node.targets = tool.targets;
                 nodesDict[node.id] = node;
             }
-            for (var i = 0; i < graph.success_ends.length; i++) {
+            for (i = 0; i < graph.success_ends.length; i++) {
                 tool = graph.success_ends[i];
                 tool.type = NodeType.END_SUCCESS;
                 node = this.addEnd(tool.x, tool.y, tool);
                 node.targets = tool.targets;
                 nodesDict[node.id] = node;
             }
-            for (var i = 0; i < graph.operations.length; i++) {
+            for (i = 0; i < graph.operations.length; i++) {
                 tool = graph.operations[i];
                 tool.type = NodeType.OPERATION;
-                tool.optSet = this.optionSetDict[tool.operationType]
+                tool.optSet = this.optionSetDict[tool.operationType];
                 node = this.addOperation(tool.x, tool.y, tool);
                 node.targets = tool.targets;
                 nodesDict[node.id] = node;

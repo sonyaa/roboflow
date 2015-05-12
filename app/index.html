@@ -45,6 +45,7 @@
                     <core-item icon="help" label="Instructions" on-tap="{{instructions}}"></core-item>
                     <!--<core-item icon="settings-applications" label="Settings" on-tap="{{settings}}"></core-item>-->
                     <core-item icon="validate" label="Validate Action" on-tap="{{validate}}"></core-item>
+                    <core-item icon="execute" label="Execute Action" on-tap="{{execute}}"></core-item>
                     <core-item icon="file-download" label="Save Action" on-tap="{{save}}"><a href="#" target="_self"></a>
                     </core-item>
                     <core-item icon="file-upload" label="Load Action" on-tap="{{load}}"></core-item>
@@ -199,6 +200,15 @@
 
         var main = document.querySelector('#mainPage');
 
+
+        main.$.rInterface.executionServices[OperationType.HEAD] = new ROSLIB.Service({
+            ros : ros,
+            name : '/execute_head_step',
+            serviceType : 'pr2_pbd_interaction/ExecuteHeadStep'
+        });
+
+        //TODO add other execution services
+
         main.PreCondType = PreCondType;
         main.PostCondType = PostCondType;
         main.OperationType = OperationType;
@@ -225,6 +235,10 @@
 
         main.validate = function() {
             main.$.rInterface.validateGraph();
+        };
+
+        main.execute = function() {
+            main.$.rInterface.executeGraph();
         };
 
         main.save = function() {
@@ -280,16 +294,16 @@
         };
 
         manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-            var savedManipulationNames = [];
+            var savedManipulations = [];
             for (var i = 0; i < result.actions.length; i++) {
-                savedManipulationNames.push(result.actions[i].name);
+                savedManipulations.push([result.actions[i].name, result.actions[i].id]);
             }
             main.mOptions = new OptionSet();
             main.mOptions.addDropDown(
                     "Choose a saved manipulation step",
                     "Manipulation",
                     "This is the manipulation that will be used for this step",
-                    savedManipulationNames
+                    savedManipulations
             );
             main.mOptions.addSlider(
                     "Object similarity",
@@ -300,31 +314,31 @@
         });
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-            var savedLocationNames = [];
+            var savedLocations = [];
             for (var i = 0; i < result.locations.length; i++) {
-                savedLocationNames.push(result.locations[i].name);
+                savedLocations.push([result.locations[i].name, result.locations[i].id]);
             }
             main.lOptions = new OptionSet();
             main.lOptions.addDropDown(
                     "Choose a saved location",
                     "Location",
                     "This is the location of the robot that will be used for this step",
-                    savedLocationNames
+                    savedLocations
             );
             main.$.rInterface.optionSetDict[OperationType.NAVIGATION] = main.lOptions;
         });
 
         headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-            var savedHeadPoseNames = [];
+            var savedHeadPoses = [];
             for (var i = 0; i < result.head_poses.length; i++) {
-                savedHeadPoseNames.push(result.head_poses[i].name);
+                savedHeadPoses.push([result.head_poses[i].name, result.head_poses[i].id]);
             }
             main.hOptions = new OptionSet();
             main.hOptions.addDropDown(
                     "Choose a saved head movement",
                     "Head position",
                     "This is the position of the robot's head that will be used for this step",
-                    savedHeadPoseNames
+                    savedHeadPoses
             );
             main.$.rInterface.optionSetDict[OperationType.HEAD] = main.hOptions;
         });
@@ -333,13 +347,13 @@
 
         function getSavedActions() {
             actionDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
-                var savedActionNames = [];
+                var savedActionNamesAndIds = [];
                 var savedActions = [];
                 for (var i = 0; i < result.actions.length; i++) {
                     if (result.actions[i] !== "") {
                         var action = JSON.parse(result.actions[i]);
                         savedActions.push(action);
-                        savedActionNames.push(action['name']);
+                        savedActionNamesAndIds.push([action['name'], action['id']]);
                     }
                 }
                 main.$.rInterface.actions = savedActions;
@@ -348,7 +362,7 @@
                         "Choose a saved procedure",
                         "Procedure",
                         "This is the procedure that will be used for this step",
-                        savedActionNames
+                        savedActionNamesAndIds
                 );
                 main.$.rInterface.optionSetDict[OperationType.PROCEDURE] = main.pOptions;
             });
