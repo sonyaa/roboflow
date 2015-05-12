@@ -137,6 +137,15 @@ function isGraphConnected(graph) {
     return true;
 }
 
+function areOperationsInstantiated(graph) {
+    for (var i = 0; i < graph.operations.length; i++) {
+        if (graph.operations[i].step_id == null) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function getGraphValidationError(graph) {
     if (graph.starts.length == 0 || graph.starts.length > 1) {
         return "A valid program must have exactly one start terminal.";
@@ -146,6 +155,9 @@ function getGraphValidationError(graph) {
     }
     if (!isGraphConnected(graph)) {
         return "All tokens must be connected."
+    }
+    if (!areOperationsInstantiated(graph)) {
+        return "All operations must be instantiated (double-click operation to select instance)."
     }
     return null;
 }
