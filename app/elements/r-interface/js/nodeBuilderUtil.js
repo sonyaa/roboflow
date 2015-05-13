@@ -110,6 +110,10 @@ function buildOperationNode(tool, x, y, canvas) {
         originY: 'center',
         top: 0
     });
+    var step_name = '(null)';
+    if (tool.step_id && tool.step_id != null) {
+
+    }
     var text = new fabric.Text(tool.name + '\n(null)', {
         fontSize: 14,
         textAlign: 'center',

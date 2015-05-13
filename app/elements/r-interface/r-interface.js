@@ -348,9 +348,23 @@
                 // items[i]: [name, id]
                 this.current.step_id = this.optSet.options[0].items[newValue][1];
                 var step_name = this.optSet.options[0].items[newValue][0];
-                this.current.item(0).item(0).set({'text':this.current.name + '\n(' + step_name + ')'});
+                this.updateOperationStepName(this.current, step_name);
                 this.current.canvas.renderAll();
             }
+        },
+
+        updateOperationStepName: function(node, step_name) {
+            if (!step_name) {
+                step_name = 'null';
+                var optItems = this.optionSetDict[node.operationType].options[0].items;
+                for (var i = 0; i < optItems.length; i++) {
+                    if (optItems[i][1] == node.step_id) {
+                        step_name = optItems[i][0];
+                        break;
+                    }
+                }
+            }
+            node.item(0).item(0).set({'text':node.name + '\n(' + step_name + ')'});
         },
 
         addOperation: function(x, y, nodeTool) {
@@ -554,6 +568,9 @@
                 tool.optSet = this.optionSetDict[tool.operationType];
                 node = this.addOperation(tool.x, tool.y, tool);
                 node.targets = tool.targets;
+                node.step_id = tool.step_id;
+                node.operationType = tool.operationType;
+                this.updateOperationStepName(node);
                 nodesDict[node.id] = node;
             }
             // add edges
