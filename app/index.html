@@ -108,6 +108,8 @@
             </paper-action-dialog>
 
             <paper-action-dialog id="saveDialog" backdrop autoCloseDisabled layered="false">
+                <p>If you were starting from scratch, saving will create a new action. Otherwise, it will replace the action
+                that was loaded in the interface.</p>
                 <p>Enter a name for the action:</p>
                 <paper-input-decorator label="{{$.rInterface.action_name}}">
                     <input id="actionName" is="core-input">
@@ -249,7 +251,7 @@
                                                     'action_id': actionData[0],
                                                     'action_str': actionData[1]
                                                 }), function (result) {
-                                                    console.log('Saved action');
+                                                    console.log('Got result from save action service: ' + result);
                                                 });
             }
             getSavedActions();
