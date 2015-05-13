@@ -494,7 +494,7 @@
             if (this.action_id == null) {
                 var id = 0;
                 for (var i = 0; i < this.actions.length; i++) {
-                    if (this.actions[i].id > id) {
+                    if (this.actions[i].id >= id) {
                         id = this.actions[i].id + 1;
                     }
                 }
@@ -561,9 +561,9 @@
                 var vertex;
                 if (object && object.isNode) {
                     for (var i = 0; i < object.targets.length; i++) {
-                        if (node.targets[i] != null) {
-                            var socket = nodesDict[node.targets[i]];
-                            var edge = new Edge(canvas, node.plugs[i]);
+                        if (object.targets[i] != null) {
+                            var socket = nodesDict[object.targets[i]].socket;
+                            var edge = new Edge(canvas, object.plugs[i]);
                             edge.connect(socket);
                         }
                     }
