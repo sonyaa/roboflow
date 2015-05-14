@@ -24,8 +24,8 @@ function Plug(c, n, name, color, radius, offsetX, offsetY) {
         hasControls: false,
         hasBorders: false
     });
-
     thiz.canvas.add(thiz.container);
+    thiz.container.bringToFront();
 
     thiz.container.on('mousedown', function (e) {
         //Ensure clicking plugs doesn't de-select the object they're attached to
@@ -48,9 +48,10 @@ function Plug(c, n, name, color, radius, offsetX, offsetY) {
 
         thiz.container.left = centerX + offsetX;
         thiz.container.top = centerY + offsetY;
+        thiz.container.setCoords();
     };
 
-    this.node.on('moving', function(e) {
+    thiz.node.on('moving', function(e) {
         thiz.refresh();
     });
 

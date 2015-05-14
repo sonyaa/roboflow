@@ -48,6 +48,7 @@ function getSocket(c, n, name, color, radius, offsetX, offsetY) {
 
         socket.left = centerX + offsetX;
         socket.top = centerY + offsetY;
+        socket.setCoords();
     };
 
     socket.node.on('moving', function(e) {
