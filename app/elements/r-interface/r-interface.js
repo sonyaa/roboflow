@@ -134,6 +134,10 @@
         node.id = tool.id;
 
         node.step_id = null;
+        node.xPercent = (node.left + (node.width / 2)) / canvas.width;
+        node.on('moving', function(e) {
+            node.xPercent = (node.left + (node.width / 2)) / canvas.width;
+        });
 
         node.updateState = function () {
             console.log('Updating state of ' + node.name);
@@ -223,9 +227,9 @@
             // Handle window resizes by properly sizing the canvas
             //
             var thiz = this;
-            window.addEventListener('resize', function() {
-                sizeCanvas(parseInt(thiz.horizontalOffset,10), parseInt(thiz.verticalOffset,10));
-            });
+            //window.addEventListener('resize', function() {
+            //    sizeCanvas(parseInt(thiz.horizontalOffset,10), parseInt(thiz.verticalOffset,10));
+            //});
 
             sizeCanvas(parseInt(this.horizontalOffset,10), parseInt(this.verticalOffset,10));
 
