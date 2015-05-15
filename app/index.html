@@ -33,7 +33,7 @@
     <script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
     <script src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
 </head>
-<body unresolved fullbleed layout vertical>
+<body unresolved fullbleed layout vertical onload="init()">
 
     <!-- We only use a template here in order to ensure that data binding happens -->
     <template id="mainPage" is="auto-binding">
@@ -211,7 +211,7 @@
 
         var main = document.querySelector('#mainPage');
 
-
+    function init() {
 
         //TODO add other execution services
 
@@ -221,17 +221,17 @@
         main.opsListIcon = 'expand-more';
         main.terminalsListIcon = 'expand-more';
 
-        main.opsListToggle = function() {
+        main.opsListToggle = function () {
             main.opsListIcon = main.opsListIcon === 'expand-more' ? 'expand-less' : 'expand-more';
             main.$.ops.toggle();
         };
 
-        main.terminalsListToggle = function() {
+        main.terminalsListToggle = function () {
             main.terminalsListIcon = main.terminalsListIcon === 'expand-more' ? 'expand-less' : 'expand-more';
             main.$.terminals.toggle();
         };
 
-        main.instructions = function() {
+        main.instructions = function () {
             main.$.rInstructions.toggle();
         };
 //
@@ -239,42 +239,47 @@
 //            main.$.settingsDialog.toggle();
 //        };
 
-        main.validate = function() {
+        main.validate = function () {
             main.$.rInterface.validateGraph();
         };
 
-        main.execute = function() {
+        main.execute = function () {
             main.$.rInterface.executeGraph();
         };
 
-        main.save = function() {
+        main.save = function () {
             main.$.saveDialog.toggle();
         };
 
-        main.confirmSave = function() {
+        var failedROSCallBack = function (error) {
+            main.$.rInterface.error('Error calling ROS service: ' + error + '. App will not work.');
+        };
+
+        main.confirmSave = function () {
             console.log('Saving action...');
             main.$.rInterface.action_name = main.$.actionName.value;
             var actionData = main.$.rInterface.getActionData();
             if (actionData[1] != null) {
                 saveActionSrvCli.callService(new ROSLIB.ServiceRequest({
-                                                    'action_id': actionData[0],
-                                                    'action_str': actionData[1]
-                                                }), function (result) {
-                                                    console.log('Got result from save action service: ' + result);
-                                                });
+                            'action_id': actionData[0],
+                            'action_str': actionData[1]
+                        }), function (result) {
+                            console.log('Got result from save action service: ' + result);
+                        }, failedROSCallBack
+                );
             }
             getSavedActions();
         };
-        main.cancelSave = function() {
+        main.cancelSave = function () {
             console.log('canceled save');
         };
 
-        main.load = function() {
+        main.load = function () {
             console.log('Loading action...');
             main.$.loadDialog.toggle();
         };
 
-        main.confirmLoad = function() {
+        main.confirmLoad = function () {
             console.log('Loading action...');
             var selected_item = document.querySelector('#saved_action_menu').selectedItem;
             if (selected_item) {
@@ -282,24 +287,24 @@
             }
         };
 
-        main.cancelLoad = function() {
+        main.cancelLoad = function () {
             console.log('canceled load');
         };
 
-        main.restart = function() {
+        main.restart = function () {
             main.$.restartDialog.toggle();
         };
 
-        main.cancelRestart = function() {
+        main.cancelRestart = function () {
             console.log('canceled restart');
         };
 
-        main.confirmRestart = function() {
+        main.confirmRestart = function () {
             main.$.rInterface.restart();
             main.$.mainMenu.selected = -1;
         };
 
-        manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+        manipulationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
             var savedManipulations = [];
             for (var i = 0; i < result.actions.length; i++) {
                 savedManipulations.push([result.actions[i].name, result.actions[i].id]);
@@ -317,9 +322,9 @@
                     0.01, 0.2, 0.075
             );
             main.$.rInterface.optionSetDict[OperationType.MANIPULATION] = main.mOptions;
-        });
+        }, failedROSCallBack);
 
-        locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+        locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
             var savedLocations = [];
             for (var i = 0; i < result.locations.length; i++) {
                 savedLocations.push([result.locations[i].name, result.locations[i].id]);
@@ -332,9 +337,9 @@
                     savedLocations
             );
             main.$.rInterface.optionSetDict[OperationType.NAVIGATION] = main.lOptions;
-        });
+        }, failedROSCallBack);
 
-        headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+        headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
             var savedHeadPoses = [];
             for (var i = 0; i < result.head_poses.length; i++) {
                 savedHeadPoses.push([result.head_poses[i].name, result.head_poses[i].id]);
@@ -348,16 +353,16 @@
             );
             main.$.rInterface.optionSetDict[OperationType.HEAD] = main.hOptions;
             main.$.rInterface.executionServices[OperationType.HEAD] = new ROSLIB.Service({
-                ros : ros,
-                name : '/execute_head_step',
-                serviceType : 'pr2_pbd_interaction/ExecuteHeadStep'
-            });
+                ros: ros,
+                name: '/execute_head_step',
+                serviceType: 'pr2_pbd_interaction/ExecuteHeadStep'
+            }, failedROSCallBack);
         });
 
         getSavedActions();
 
         function getSavedActions() {
-            actionDataSrvCli.callService(new ROSLIB.ServiceRequest(), function(result) {
+            actionDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
                 var savedActionNamesAndIds = [];
                 var savedActions = [];
                 for (var i = 0; i < result.actions.length; i++) {
@@ -376,8 +381,9 @@
                         savedActionNamesAndIds
                 );
                 main.$.rInterface.optionSetDict[OperationType.PROCEDURE] = main.pOptions;
-            });
+            }, failedROSCallBack);
         }
+    }
 
     </script>
 </body>
