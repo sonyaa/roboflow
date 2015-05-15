@@ -169,6 +169,15 @@
         var ros = new ROSLIB.Ros({
             url : 'ws://' + window.location.hostname + ':9091'
         });
+        ros.on("error", function() {
+            alert("Error connecting to the ROS server. App will not work.")
+        });
+        ros.on('connection', function() {
+            console.log('Connected to ROS server.');
+        });
+        ros.on('close', function() {
+            console.log('Connection to ROS server closed.');
+        });
 
         var manipulationDataSrvCli = new ROSLIB.Service({
             ros : ros,
