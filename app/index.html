@@ -322,6 +322,7 @@
                     0.01, 0.2, 0.075
             );
             main.$.rInterface.optionSetDict[OperationType.MANIPULATION] = main.mOptions;
+            // TODO add execution services and precondition services
         }, failedROSCallBack);
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
@@ -357,6 +358,7 @@
                 name: '/execute_head_step',
                 serviceType: 'pr2_pbd_interaction/ExecuteHeadStep'
             }, failedROSCallBack);
+            main.$.rInterface.executionTimeouts[OperationType.HEAD] = 10;
         });
 
         getSavedActions();

@@ -39,3 +39,7 @@ var OperationType = {
     NAVIGATION: 'Navigation',
     PROCEDURE: 'Procedure'
 };
+
+var ExecutionStatus = {
+    SUCCESS: 1
+};

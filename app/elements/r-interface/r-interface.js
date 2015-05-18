@@ -186,7 +186,9 @@
             action_id: null,
             action_name: null,
             optionSetDict: {},
-            executionServices: {}
+            executionServices: {},
+            executionTimeouts: {},
+            preconditionServices: {}
         },
 
         observe: {
@@ -454,6 +456,116 @@
             }
         },
 
+        executeNode: function(node, graph) {
+            if (node.type == NodeType.END_SUCCESS) {
+                this.info('Action completed successfully!');
+            } else if (node.type == NodeType.END_FAIL) {
+                this.info('Action failed.');
+            } else if (node.type == NodeType.OPERATION) {
+                if (node.preConds.length == 0) {
+                    this.executeOperationAndPostconditions(node, graph);
+                } else {
+                    this.executePrecondition(node, graph, 0);
+                }
+            } else {
+                console.warn('Invalid node type: ' + node.type);
+            }
+        },
+
+        waitFor: function(test, msec, count, callback, timeOut) {
+            // Check if we got a response from server. If not, re-check later (msec).
+            if (!test()) {
+                count++;
+                if (count*msec/1000 > timeOut) {
+                    this.error('Timeout while waiting for execution result; action aborted!');
+                    return;
+
+                }
+                setTimeout(function() {
+                    this.waitFor(test, msec, count, callback, timeOut);
+                }, msec);
+                return;
+            }
+            // Condition finally met. callback() can be executed.
+            console.log('Condition met! Will execute callback.');
+            callback();
+        },
+
+        executeOperationAndPostconditions: function(node, graph) {
+            var timeOut = this.executionTimeouts[node.operationType];
+            if (!timeOut) {
+                timeOut = 30;
+            }
+            var gotResponse = false;
+            this.executionServices[node.operationType].callService(new ROSLIB.ServiceRequest({
+                'step_id': node.step_id
+            }), function (result) {
+                gotResponse = true;
+                console.log('Received execution status: ' + result.status);
+                node.status = result.status;
+            });
+
+            var test = function() {
+                return gotResponse;
+            };
+            var gotStatusCb = function() {
+                //This gets called after we receive the execution status from the server.
+                if (node.postConds.length == 0) {
+                    // Node has no postconditions - exit to the first target after preconditions.
+                    this.executeNode(graph.vertices[node.targets[node.preConds.length]], graph);
+                } else {
+                    for (var i = 0; i < node.postConds.length; i++) {
+                        var postCond = node.postConds[i];
+                        // If postondition is not satisfied, exit to corresponding target, otherwise continue to next condition.
+                        if (!checkPostCondition(postCond, node.status)) {
+                            console.log('Post condition "' + postCond + '" failed.');
+                            this.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
+                            return;
+                        }
+                    }
+                    // If we got to here, that means all postconditions were satisfied. Exit to last target.
+                    // At this point i == number of postconditions == index of last target.
+                    console.log('All postconditions were successful.');
+                    this.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
+                    node.status = null;
+                }
+            };
+
+            this.waitFor(test, 500, 0, gotStatusCb, timeOut);
+        },
+
+        executePrecondition: function(node, graph, preCondIndex) {
+            var precondTimeout = 10;
+            var gotResponse = false;
+            var condition = node.preConds[preCondIndex];
+            var preCondResult = false;
+            this.preconditionServices[node.operationType][condition].callService(new ROSLIB.ServiceRequest({
+                'step_id': node.step_id
+            }), function (result) {
+                gotResponse = true;
+                console.log('Received precondition check result: ' + result.status + ' for precondition "' + condition + '"');
+                preCondResult = result.status;
+            });
+            var test = function() {
+                return gotResponse;
+            };
+            var gotStatusCb = function() {
+                //This gets called after we receive the precondition check response from the server.
+                if (!preCondResult) {
+                    // If precondition returned false, exit to the corresponding target.
+                    this.executeNode(graph.vertices[node.targets[preCondIndex]], graph);
+                } else if (preCondIndex+1 < node.preConds.length) {
+                    // If there are more conditions continue to the next condition.
+                    this.executePrecondition(node, graph, preCondIndex+1);
+                } else {
+                    // Otherwise execute the node itself.
+                    this.executeOperationAndPostconditions(node, graph);
+                }
+            };
+
+            this.waitFor(test, 500, 0, gotStatusCb, precondTimeout);
+        },
+
         executeGraph: function() {
             var graph = this.validateGraph();
             if (graph != null) {
@@ -462,11 +574,13 @@
                 var curVertexId = graph.starts[0].targets[0];
                 var gotResponse = true;
                 var reqTime = 0;
+                // Timeout in seconds - how long to wait for response from server before aborting.
+                // Should depend on operation type.
+                var timeOut = 30;
                 while (true) {
                     if (!gotResponse) {
-                        if ( Math.floor((new Date() - reqTime)/60000) > 0.5 ) {
-                            // Timeout after 30 seconds.
-                            // TODO the timeout maybe should depend on the type of operation
+                        if ( Math.floor((new Date() - reqTime)/1000) > timeOut ) {
+                            // Timeout depends on operation type and on whether it's execution or condition checking.
                             this.error('Timeout while waiting for execution result; action aborted!');
                             break;
                         }
@@ -482,10 +596,12 @@
                     } else if (curVertex.type == NodeType.OPERATION) {
                         // TODO check preconditions
                         gotResponse = false;
+                        timeOut = this.executionTimeouts[curVertex.operationType];
                         reqTime =  new Date();
                         this.executionServices[curVertex.operationType].callService(new ROSLIB.ServiceRequest({
                                                 'step_id': curVertex.step_id
                                             }), function (result) {
+                                                gotResponse = true;
                                                 console.log('Received execution status: ' + result.status);
                                                 if (!status) {
                                                     curVertexId = curVertex.targets[curVertex.preConds.length]
@@ -494,7 +610,6 @@
                                                     // or zero postconditions - as for the HeadStep.
                                                     curVertexId = curVertex.targets[curVertex.preConds.length+curVertex.postConds.length]
                                                 }
-                                                gotResponse = true;
                                             });
 
                         // TODO check postconditions
