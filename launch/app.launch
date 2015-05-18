@@ -9,6 +9,26 @@
   <arg name="roboflowFileExtension" default=".json" />
   <arg name="tabletop_segmentation_service" value="tabletop_segmentation" />
 
+  <!-- The following is required for pr2_pbd_interaction -->
+
+  <arg name="kinect_frame_prefix" default="/head_mount_kinect" />
+  <arg name="kinect_camera_name" default="head_mount_kinect" />
+  <include file="$(find pr2_social_gaze)/launch/gaze.launch" />
+  <include file="$(find pr2_moveit_config)/launch/move_group.launch" />
+   <!-- Turn on the Kinect -->
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
+    <arg name="camera" value="head_mount_kinect"/>
+    <arg name="rgb_frame_id" value="$(arg kinect_frame_prefix)_rgb_optical_frame"/>
+    <arg name="depth_frame_id" value="$(arg kinect_frame_prefix)_depth_optical_frame"/>
+    <arg name="publish_tf" value="false"/> <!-- We publish the tf ourselves with kinect_frame.launch -->
+  </include>
+  <include file="$(find pr2_pbd_interaction)/launch/kinect_frames.launch">
+    <arg name="camera" value="head_mount_kinect" />
+  </include>
+  <include file="$(find tabletop_object_detector)/launch/tabletop_segmentation.launch">
+      <arg name="tabletop_segmentation_points_in" value="$(arg kinect_camera_name)/depth/points" />
+  </include>
   <node name="pr2_pbd_interaction" pkg="pr2_pbd_interaction" type="action_manager.py" output="screen">
     <param name="dataRoot" value="$(arg dataRoot)" />
     <param name="actionsRoot" value="$(arg manipulationsRoot)" />
