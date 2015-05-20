@@ -119,47 +119,6 @@
         return ret;
     }
 
-    function processNewNode(node, type, tool, x, y) {
-
-        node.isNode = true;
-        node.isComplete = false;
-        node.type = type;
-
-        node.edges = {};
-        node.edges.outgoing = [];
-        node.edges.incoming = [];
-
-        node.name = tool.name;
-        node.color = tool.color;
-        node.id = tool.id;
-
-        node.step_id = null;
-        node.xPercent = (node.left + (node.width / 2)) / canvas.width;
-        node.on('moving', function(e) {
-            node.xPercent = (node.left + (node.width / 2)) / canvas.width;
-        });
-
-        node.updateState = function () {
-            console.log('Updating state of ' + node.name);
-            // TODO
-            node.isComplete = true;
-        };
-
-        if(type === NodeType.OPERATION) {
-            node.operationType = tool.operationType;
-            if (tool.optSet && tool.optSet.hasOptions) {
-                node.optSet = tool.optSet.clone();
-            }
-        }
-
-        //Define where the node can be in the interface
-        setBounds(node);
-
-        node.selector = new Selector(canvas, node);
-        node.adorners = new Adorners(canvas, node, true);
-
-        return node;
-    }
     //
     //function isTransformComplete(node) {
     //    var objects = canvas.getObjects();
@@ -373,13 +332,44 @@
             node.item(0).item(0).set({'text':node.name + '\n(' + step_name + ')'});
         },
 
-        addOperation: function(x, y, nodeTool) {
-            var self = this;
+        processNewNode:function(node, type, tool, x, y) {
 
-            var pos = setInitialXY(x, y, NodeType.OPERATION);
+            node.isNode = true;
+            node.isComplete = false;
+            node.type = type;
 
-            var node = buildOperationNode(nodeTool, pos.x, pos.y, canvas);
-            processNewNode(node, NodeType.OPERATION, nodeTool, pos.x, pos.y);
+            node.edges = {};
+            node.edges.outgoing = [];
+            node.edges.incoming = [];
+
+            node.name = tool.name;
+            node.color = tool.color;
+            node.id = tool.id;
+
+            node.step_id = null;
+            node.xPercent = (node.left + (node.width / 2)) / canvas.width;
+            node.on('moving', function(e) {
+                node.xPercent = (node.left + (node.width / 2)) / canvas.width;
+            });
+
+            node.updateState = function () {
+                console.log('Updating state of ' + node.name);
+                // TODO
+                node.isComplete = true;
+            };
+
+            if(type === NodeType.OPERATION) {
+                node.operationType = tool.operationType;
+                if (tool.optSet && tool.optSet.hasOptions) {
+                    node.optSet = tool.optSet.clone();
+                }
+            }
+
+            //Define where the node can be in the interface
+            setBounds(node);
+
+            node.selector = new Selector(canvas, node);
+            node.adorners = new Adorners(canvas, node, true);
 
             var deleteDialog = this.$.deleteDialog;
 
@@ -388,6 +378,18 @@
                 deletingItem = node;
                 deleteDialog.toggle();
             });
+
+
+            return node;
+        },
+
+        addOperation: function(x, y, nodeTool) {
+            var self = this;
+
+            var pos = setInitialXY(x, y, NodeType.OPERATION);
+
+            var node = buildOperationNode(nodeTool, pos.x, pos.y, canvas);
+            this.processNewNode(node, NodeType.OPERATION, nodeTool, pos.x, pos.y);
 
             //Handle options interface
             node.on('dblclick', function() {
@@ -405,15 +407,7 @@
             var pos = setInitialXY(x, y, NodeType.START);
 
             var node = buildStartNode(nodeTool, pos.x, pos.y, canvas);
-            processNewNode(node, NodeType.START, nodeTool, pos.x, pos.y);
-
-            var deleteDialog = this.$.deleteDialog;
-
-            node.adorners.addAdorner('close', 'red', 1, 2, Icon.CLOSE);
-            node.adorners.addListener('close', function (e) {
-                deletingItem = node;
-                deleteDialog.toggle();
-            });
+            this.processNewNode(node, NodeType.START, nodeTool, pos.x, pos.y);
 
             canvas.add(node);
 
@@ -426,15 +420,8 @@
             var pos = setInitialXY(x, y, nodeTool.type);
 
             var node = buildEndNode(nodeTool, pos.x, pos.y, canvas);
-            processNewNode(node, nodeTool.type, nodeTool, pos.x, pos.y);
+            this.processNewNode(node, nodeTool.type, nodeTool, pos.x, pos.y);
 
-            var deleteDialog = this.$.deleteDialog;
-
-            node.adorners.addAdorner('close', 'red', 1, 2, Icon.CLOSE);
-            node.adorners.addListener('close', function (e) {
-                deletingItem = node;
-                deleteDialog.toggle();
-            });
             canvas.add(node);
 
             return node;
