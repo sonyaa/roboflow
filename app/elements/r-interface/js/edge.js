@@ -21,7 +21,7 @@ function Edge(c, p) {
     var toX = thiz.from.container.left + 2 * thiz.from.radius;
     var toY = thiz.from.container.top + thiz.from.radius;
 
-    function drawArrow(x1, y1, x2, y2, dashed, width) {
+    this.drawArrow = function(x1, y1, x2, y2, dashed, width) {
         width = typeof width !== 'undefined' ? width : 6;
         var select = typeof this.to !== 'undefined';
 
@@ -32,12 +32,26 @@ function Edge(c, p) {
 
         canvas.remove(group);
 
-        var endOffset = x2 < x1 ? 20 : -20;
+        var endOffset = x2 < x1 ? 25 : -20;
 
         var connector = paths.Connector({
             start: [x1, y1],
             end: [x2 + endOffset, y2]
         });
+
+        // If edge connects a node to itself, make it go around the node
+        if (this.to && this.to.node == this.from.node) {
+            if (Math.abs(x2-x1) <= 10) {
+                x2 = x1;
+            }
+            var path = paths.Path()
+                .moveto(x1, y1)
+                .lineto(x1 + this.to.node.width/2, y1)
+                .lineto(x1 + this.to.node.width/2, y2)
+                .lineto(x2 + endOffset, y2);
+            connector = Object();
+            connector.path = path;
+        }
 
         var arrow = null;
 
@@ -84,12 +98,12 @@ function Edge(c, p) {
 
         canvas.add(group);
         canvas.sendToBack(group);
-    }
+    };
 
-    var update = function() {
+    this.update = function() {
         setFromTo();
 
-        drawArrow(fromX, fromY, toX, toY);
+        thiz.drawArrow(fromX, fromY, toX, toY);
     };
 
     function handleError(msg, isHTML) {
@@ -102,7 +116,7 @@ function Edge(c, p) {
     }
 
     this.connect = function(target) {
-        canvas.off('mouse:move', dragLine);
+        canvas.off('mouse:move', thiz.dragLine);
         canvas.forEachObject(function(object) {
             if(object.isSocket) {
                 canvas.remove(object.selector);
@@ -120,8 +134,8 @@ function Edge(c, p) {
                 return;
             }
 
-            thiz.from.node.on('moving', update);
-            thiz.to.node.on('moving', update);
+            thiz.from.node.on('moving', thiz.update);
+            thiz.to.node.on('moving', thiz.update);
 
             thiz.from.node.edges.outgoing.push(thiz);
             thiz.to.node.edges.incoming.push(thiz);
@@ -132,7 +146,7 @@ function Edge(c, p) {
             thiz.from.edge = thiz;
             thiz.to.edge = thiz;
 
-            update();
+            thiz.update();
 
             canvas.renderAll();
         }
@@ -171,18 +185,18 @@ function Edge(c, p) {
         toY = toTargetY;
     };
 
-    var dragLine = function (p) {
+    this.dragLine = function (p) {
         if(p.target && p.target.isSocket) {
             setFromTo(p.target.left, p.e.offsetY);
-            drawArrow(fromX, fromY, toX, toY, true);
+            thiz.drawArrow(fromX, fromY, toX, toY, true);
         } else {
             setFromTo(p.e.offsetX, p.e.offsetY);
-            drawArrow(fromX, fromY, toX, toY, true);
+            thiz.drawArrow(fromX, fromY, toX, toY, true);
         }
     };
 
     this.startConnection = function() {
-        canvas.on('mouse:move', dragLine);
+        canvas.on('mouse:move', thiz.dragLine);
         canvas.on('mouse:down', generateConnector);
         canvas.forEachObject(function(object) {
             if(object.isSocket) {
@@ -202,18 +216,18 @@ function Edge(c, p) {
     };
 
     this.dispose = function() {
-        canvas.off('mouse:move', dragLine);
+        canvas.off('mouse:move', thiz.dragLine);
         canvas.off('mouse:down', generateConnector);
 
         canvas.remove(group);
 
         thiz.from.edge = null;
-        thiz.from.node.off('moving', update);
+        thiz.from.node.off('moving', thiz.update);
         thiz.from.node.edges.outgoing.splice($.inArray(thiz, thiz.from), 1);
 
         if(thiz.to) {
             thiz.to.edge = null;
-            thiz.to.node.off('moving', update);
+            thiz.to.node.off('moving', thiz.update);
             thiz.to.node.edges.incoming.splice($.inArray(thiz, thiz.to), 1);
         }
 
