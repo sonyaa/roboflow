@@ -473,6 +473,7 @@
         },
 
         waitFor: function(test, msec, count, callback, timeOut) {
+            var that = this;
             // Check if we got a response from server. If not, re-check later (msec).
             if (!test()) {
                 count++;
@@ -482,7 +483,7 @@
 
                 }
                 setTimeout(function() {
-                    this.waitFor(test, msec, count, callback, timeOut);
+                    that.waitFor(test, msec, count, callback, timeOut);
                 }, msec);
                 return;
             }
@@ -492,6 +493,7 @@
         },
 
         executeOperationAndPostconditions: function(node, graph) {
+            var that = this;
             var timeOut = this.executionTimeouts[node.operationType];
             if (!timeOut) {
                 timeOut = 30;
@@ -512,21 +514,21 @@
                 //This gets called after we receive the execution status from the server.
                 if (node.postConds.length == 0) {
                     // Node has no postconditions - exit to the first target after preconditions.
-                    this.executeNode(graph.vertices[node.targets[node.preConds.length]], graph);
+                    that.executeNode(graph.vertices[node.targets[node.preConds.length]], graph);
                 } else {
                     for (var i = 0; i < node.postConds.length; i++) {
                         var postCond = node.postConds[i];
                         // If postondition is not satisfied, exit to corresponding target, otherwise continue to next condition.
                         if (!checkPostCondition(postCond, node.status)) {
                             console.log('Post condition "' + postCond + '" failed.');
-                            this.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
+                            that.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
                             return;
                         }
                     }
                     // If we got to here, that means all postconditions were satisfied. Exit to last target.
                     // At this point i == number of postconditions == index of last target.
                     console.log('All postconditions were successful.');
-                    this.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
+                    that.executeNode(graph.vertices[node.targets[node.preConds.length+i]], graph);
                     node.status = null;
                 }
             };
@@ -535,6 +537,7 @@
         },
 
         executePrecondition: function(node, graph, preCondIndex) {
+            var that = this;
             var precondTimeout = 10;
             var gotResponse = false;
             var condition = node.preConds[preCondIndex];
@@ -553,13 +556,13 @@
                 //This gets called after we receive the precondition check response from the server.
                 if (!preCondResult) {
                     // If precondition returned false, exit to the corresponding target.
-                    this.executeNode(graph.vertices[node.targets[preCondIndex]], graph);
+                    that.executeNode(graph.vertices[node.targets[preCondIndex]], graph);
                 } else if (preCondIndex+1 < node.preConds.length) {
                     // If there are more conditions continue to the next condition.
-                    this.executePrecondition(node, graph, preCondIndex+1);
+                    that.executePrecondition(node, graph, preCondIndex+1);
                 } else {
                     // Otherwise execute the node itself.
-                    this.executeOperationAndPostconditions(node, graph);
+                    that.executeOperationAndPostconditions(node, graph);
                 }
             };
 
@@ -570,55 +573,8 @@
             var graph = this.validateGraph();
             if (graph != null) {
                 // If we're here, it means graph is valid: one start, all nodes connected etc.
-                // Need to check that all steps are instantiated!
                 var curVertexId = graph.starts[0].targets[0];
-                var gotResponse = true;
-                var reqTime = 0;
-                // Timeout in seconds - how long to wait for response from server before aborting.
-                // Should depend on operation type.
-                var timeOut = 30;
-                while (true) {
-                    if (!gotResponse) {
-                        if ( Math.floor((new Date() - reqTime)/1000) > timeOut ) {
-                            // Timeout depends on operation type and on whether it's execution or condition checking.
-                            this.error('Timeout while waiting for execution result; action aborted!');
-                            break;
-                        }
-                        continue;
-                    }
-                    var curVertex = graph.vertices[curVertexId];
-                    if (curVertex.type == NodeType.END_SUCCESS) {
-                        this.info('Action completed successfully!');
-                        break;
-                    } else if (curVertex.type == NodeType.END_FAIL) {
-                        this.info('Action failed.');
-                        break;
-                    } else if (curVertex.type == NodeType.OPERATION) {
-                        // TODO check preconditions
-                        gotResponse = false;
-                        timeOut = this.executionTimeouts[curVertex.operationType];
-                        reqTime =  new Date();
-                        this.executionServices[curVertex.operationType].callService(new ROSLIB.ServiceRequest({
-                                                'step_id': curVertex.step_id
-                                            }), function (result) {
-                                                gotResponse = true;
-                                                console.log('Received execution status: ' + result.status);
-                                                if (!status) {
-                                                    curVertexId = curVertex.targets[curVertex.preConds.length]
-                                                } else {
-                                                    // This assumes either exactly one postcondition - the "Success?" one,
-                                                    // or zero postconditions - as for the HeadStep.
-                                                    curVertexId = curVertex.targets[curVertex.preConds.length+curVertex.postConds.length]
-                                                }
-                                            });
-
-                        // TODO check postconditions
-                    } else {
-                        console.warn('Invalid node type: ' + curVertex.type);
-                        break;
-                    }
-                }
-
+                this.executeNode(graph.vertices[curVertexId], graph);
             }
         },
 
