@@ -98,11 +98,6 @@ function Edge(c, p) {
     }
 
     function checkConstraints() {
-        //Constraint: edges cannot connect an output of a node to the same node's input
-        if (thiz.to.node === thiz.from.node) {
-            handleError('Error: A node cannot be connected to itself!');
-            return false;
-        }
         return true;
     }
 
