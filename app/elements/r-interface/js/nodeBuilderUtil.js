@@ -141,20 +141,16 @@ function buildOperationNode(tool, x, y, canvas) {
     var elements = [token];
     var conditionHeight = tokenHeight + linkLength;
     var numPreCond = 0;
-    for (var i in tool.preConds) {
-        if(tool.preConds.hasOwnProperty(i)) {
-            elements.push(buildCondition(tool.preConds[i], tool.color,
-                tokenHeight, tokenWidth, linkLength, - conditionHeight * i - (tokenHeight + linkLength + conditionHeight)/2));
-            numPreCond += 1;
-        }
+    for (var i = 0; i < tool.preConds.length; i++) {
+        elements.push(buildCondition(tool.preConds[i], tool.color,
+            tokenHeight, tokenWidth, linkLength, - conditionHeight * (tool.preConds.length-i-1) - (tokenHeight + linkLength + conditionHeight)/2));
+        numPreCond += 1;
     }
     var numPostCond = 0;
-    for (var j in tool.postConds) {
-        if(tool.postConds.hasOwnProperty(j)) {
-            elements.push(buildCondition(tool.postConds[j], tool.color,
-                tokenHeight, tokenWidth, linkLength, conditionHeight * j + (tokenHeight + linkLength + conditionHeight)/2));
-            numPostCond += 1;
-        }
+    for (var j = 0; j < tool.postConds.length; j++) {
+        elements.push(buildCondition(tool.postConds[j], tool.color,
+            tokenHeight, tokenWidth, linkLength, conditionHeight * j + (tokenHeight + linkLength + conditionHeight)/2));
+        numPostCond += 1;
     }
     var line2 = new fabric.Line([0, 0, 0, linkLength], {
         stroke: tool.color,
@@ -177,22 +173,18 @@ function buildOperationNode(tool, x, y, canvas) {
         -(tokenHeight + 2*linkLength + conditionHeight*numPreCond + conditionHeight*numPostCond)/2 - socketRadius);
     node.plugs = [];
     node.targets = [];
-    for (i in tool.preConds) {
-        if(tool.preConds.hasOwnProperty(i)) {
-            node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
-                plugRadius,
-                node.width/2 + plugRadius,
-                - conditionHeight * i - (tokenHeight + linkLength)/2 ));
-        }
+    for (i = 0; i < tool.preConds.length; i++) {
+        node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
+            plugRadius,
+            node.width/2 + plugRadius,
+            - conditionHeight * i - (tokenHeight + linkLength)/2 ));
         node.targets.push(null)
     }
-    for (j in tool.postConds) {
-        if(tool.postConds.hasOwnProperty(j)) {
-            node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
-                plugRadius,
-                node.width/2 + plugRadius,
-                conditionHeight * j + (tokenHeight + linkLength)/2 + conditionHeight*numPreCond/2));
-        }
+    for (j = 0; j < tool.postConds.length; j++) {
+        node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
+            plugRadius,
+            node.width/2 + plugRadius,
+            conditionHeight * j + (tokenHeight + linkLength)/2 + conditionHeight*numPreCond/2));
         node.targets.push(null)
     }
     node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
