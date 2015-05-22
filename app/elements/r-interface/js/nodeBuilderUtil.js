@@ -177,7 +177,7 @@ function buildOperationNode(tool, x, y, canvas) {
         node.plugs.push(new Plug(canvas, node, tool.name, tool.color,
             plugRadius,
             node.width/2 + plugRadius,
-            - conditionHeight * i - (tokenHeight + linkLength)/2 ));
+            - conditionHeight * (tool.preConds.length-i-1) - (tokenHeight + linkLength)/2 ));
         node.targets.push(null)
     }
     for (j = 0; j < tool.postConds.length; j++) {

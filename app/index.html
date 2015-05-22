@@ -322,7 +322,17 @@
                     0.01, 0.2, 0.075
             );
             main.$.rInterface.optionSetDict[OperationType.MANIPULATION] = main.mOptions;
-            // TODO add execution services and precondition services
+            main.$.rInterface.executionServices[OperationType.MANIPULATION] = new ROSLIB.Service({
+                ros: ros,
+                name: '/execute_manipulation_step',
+                serviceType: 'pr2_pbd_interaction/ExecuteManipulationStep'
+            }, failedROSCallBack);
+            main.$.rInterface.executionTimeouts[OperationType.MANIPULATION] = 60;
+            main.$.rInterface.preconditionServices[OperationType.MANIPULATION] = new ROSLIB.Service({
+                ros: ros,
+                name: '/check_manipulation_conditions',
+                serviceType: 'pr2_pbd_interaction/CheckManipulationConditions'
+            }, failedROSCallBack);
         }, failedROSCallBack);
 
         locationDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {
@@ -338,6 +348,12 @@
                     savedLocations
             );
             main.$.rInterface.optionSetDict[OperationType.NAVIGATION] = main.lOptions;
+            main.$.rInterface.executionServices[OperationType.NAVIGATION] = new ROSLIB.Service({
+                ros: ros,
+                name: '/execute_location_step',
+                serviceType: 'rws_pr2_navigation/ExecuteLocationStep'
+            }, failedROSCallBack);
+            main.$.rInterface.executionTimeouts[OperationType.NAVIGATION] = 60;
         }, failedROSCallBack);
 
         headDataSrvCli.callService(new ROSLIB.ServiceRequest(), function (result) {

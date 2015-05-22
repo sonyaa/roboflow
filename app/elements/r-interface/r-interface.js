@@ -475,7 +475,7 @@
                 return;
             }
             // Condition finally met. callback() can be executed.
-            console.log('Condition met! Will execute callback.');
+            console.log('Got result! Will execute callback.');
             callback();
         },
 
@@ -528,13 +528,23 @@
             var precondTimeout = 10;
             var gotResponse = false;
             var condition = node.preConds[preCondIndex];
+            // TODO: switch to using an enum for preconditions
+            var condition_type = -1;
+            if (condition == PreCondType.OBJECTS) {
+                condition_type = 0;
+            } else if (condition == PreCondType.REACHABLE) {
+                condition_type = 1;
+            }
             var preCondResult = false;
-            this.preconditionServices[node.operationType][condition].callService(new ROSLIB.ServiceRequest({
-                'step_id': node.step_id
+            this.preconditionServices[node.operationType].callService(new ROSLIB.ServiceRequest({
+                'step_id': node.step_id,
+                'condition_type': {
+                    'type': condition_type
+                }
             }), function (result) {
                 gotResponse = true;
-                console.log('Received precondition check result: ' + result.status + ' for precondition "' + condition + '"');
-                preCondResult = result.status;
+                console.log('Received precondition check result: ' + result.result + ' for precondition "' + condition + '"');
+                preCondResult = result.result;
             });
             var test = function() {
                 return gotResponse;
@@ -542,12 +552,15 @@
             var gotStatusCb = function() {
                 //This gets called after we receive the precondition check response from the server.
                 if (!preCondResult) {
+                    console.log('Precondition returned false, exiting to target.');
                     // If precondition returned false, exit to the corresponding target.
                     that.executeNode(graph.vertices[node.targets[preCondIndex]], graph);
                 } else if (preCondIndex+1 < node.preConds.length) {
+                    console.log('Precondition returned true, continuing to next precondition.');
                     // If there are more conditions continue to the next condition.
                     that.executePrecondition(node, graph, preCondIndex+1);
                 } else {
+                    console.log('Precondition returned true, continuing to operation.');
                     // Otherwise execute the node itself.
                     that.executeOperationAndPostconditions(node, graph);
                 }
