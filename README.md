@@ -26,7 +26,7 @@ Finally, we can use npm and bower to install the remainder of the dependencies w
 If you run into any conflicts between bower packages, always choose the package with the highest version number. Additionally, ensure that you are using the Sass 2.1.* version and not the 2.2.* version as this may cause build errors.
 
 # Launching the web GUI
-Once all of the dependencies are installed, you can build the project by running gulp from the top-level directory of the project. If you want to build and view the application (serve it to your browser), run gulp serve.
+Once all of the dependencies are installed, you can build the project by running gulp from the top-level directory of the project. If you want to build and view the application (serve it to your browser), run gulp serve. THe recommended web browser is Chrome.
 
 # Launching on the robot
 On the robot, launch the following:
