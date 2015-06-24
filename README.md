@@ -15,13 +15,13 @@ This project is built using Gulp (build system) and Polymer (web component frame
 
 Next, clone this project and cd in the project's top level directory. Run the following commands to install some node modules we will be using:
 
-    npm install -g bower
-    npm install -g yo
+    sudo npm install -g bower
+    sudo npm install -g yo
 
 Finally, we can use npm and bower to install the remainder of the dependencies which are specified in the package.json and bower.json files:
 
-    npm install
-    bower install
+    sudo npm install
+    sudo bower install
 
 If you run into any conflicts between bower packages, always choose the package with the highest version number. Additionally, ensure that you are using the Sass 2.1.* version and not the 2.2.* version as this may cause build errors.
 
